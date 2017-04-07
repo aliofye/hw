@@ -95,7 +95,6 @@ void eval(ItemStack& exprStack) {
     	throw std::runtime_error("Malformed expression.");
     }
     	
-    //set expression stack to evaluation stack
     exprStack = evalStack;
 }
 
