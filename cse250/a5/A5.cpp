@@ -112,33 +112,26 @@ ItemStack generateStack(ITNode* root) {
    
     ItemStack exprStack;
 
-    //push root
-    exprStack.push(root->_item);
-    
-    //memorize root position
-    ITNode* copy = nullptr;
-    copy = root;
+    std::stack<ITNode*> iter;
 
-//traverse left side
-    
-    exprStack.push(copy->_left->_item);
-    
-    copy = copy->_left;
-    exprStack.push(copy->_left->_item);
-    exprStack.push(copy->_right->_item);
+    iter.push(root);
 
-//reset
-    copy = root;
+    while(!iter.empty()){
+        
+        ITNode* pos = iter.top();
+        iter.pop();
+        
+        //visit node
+        exprStack.push(pos->_item);
 
-//traverse right side
+        if(pos->_left != nullptr){
+            iter.push(pos->_left);
+        }
 
-    exprStack.push(copy->_right->_item);
-    
-    copy = copy->_right;
-    exprStack.push(copy->_right->_item);
-    exprStack.push(copy->_left->_item);
-
-
+        if(pos->_right != nullptr){
+            iter.push(pos->_right);
+        }
+    }
 
     return exprStack;
 }
