@@ -109,9 +109,36 @@ void eval(ItemStack& exprStack) {
  *                    (if reading RPN from left to right)
  */
 ItemStack generateStack(ITNode* root) {
-   // Your code goes here.
-   ItemStack exprStack;
+   
+    ItemStack exprStack;
+
+    //push root
+    exprStack.push(root->_item);
+    
+    //memorize root position
+    ITNode* copy = nullptr;
+    copy = root;
+
+//traverse left side
+    
+    exprStack.push(copy->_left->_item);
+    
+    copy = copy->_left;
+    exprStack.push(copy->_left->_item);
+    exprStack.push(copy->_right->_item);
+
+//reset
+    copy = root;
+
+//traverse right side
+
+    exprStack.push(copy->_right->_item);
+    
+    copy = copy->_right;
+    exprStack.push(copy->_right->_item);
+    exprStack.push(copy->_left->_item);
 
 
-   return exprStack;
+
+    return exprStack;
 }

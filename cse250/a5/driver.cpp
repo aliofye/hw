@@ -24,8 +24,8 @@ void deleteExprTree(ITNode* tree) {
 int main() {
     /* Change the expression and expected values here to test your code */
     // This is the result of the expression (3 + 4) * (2 - 5) * (2 - 5)
-    std::vector<Item> expr = {{3},{4},{'+'},{2},{5},{'-'},{2},{5},{'-'},{'*'},{'*'}};
-    int expected = 63;
+    std::vector<Item> expr = {{3},{4},{'+'},{2},{5},{'-'},{'*'}};
+    int expected = -21;
     bool expectException = false;
     
     // exprTree will hold a tree with the expression (3 + 4) * (2 - 5)
@@ -72,7 +72,6 @@ int main() {
         }
     }
 
-    /*
     try {
         // Convert expression in tree to a stack.
         s = generateStack(exprTree);
@@ -100,7 +99,7 @@ int main() {
             std::cout << "Threw exception correctly." << std::endl;
         }
     }
-    */
+    
 
 
     // Clean up tree memory.
