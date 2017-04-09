@@ -1,6 +1,4 @@
 #include "A5.hpp"
-#include <iostream>
-
 /**
  * eval
  *
@@ -19,6 +17,16 @@ void eval(ItemStack& exprStack) {
     const int MIN_ARGS = 2;
     const int DIVIDE_BY_ZERO = 0;
     const int MAX_RESULT = 1;
+    const int ONE_VALUE = 1;
+
+    if(exprStack.empty()){
+
+        throw std::runtime_error("Malformed expression.");
+
+    } else if(exprStack.size() == ONE_VALUE){
+
+        return;
+    }
 
     //while there are input tokens left
 
@@ -42,11 +50,18 @@ void eval(ItemStack& exprStack) {
     			
     			Item one = evalStack.top();
     			evalStack.pop();
-    			int rhs = one.getVal();
     			
     			Item two = evalStack.top();
     			evalStack.pop();
+
+                //if either of the operands is actually an operator
+                if(one.getType() != VAL || two.getType() != VAL){
+                    throw std::runtime_error("Malformed expression.");
+                }
+
+                int rhs = one.getVal();
     			int lhs = two.getVal();
+
 
     			switch(token.getType()){
     				case MUL:
@@ -135,3 +150,30 @@ ItemStack generateStack(ITNode* root) {
 
     return exprStack;
 }
+
+
+/*ITNode* generateExprTree (std::string expr){
+    ITNode* root;
+    
+    //count paranthesis and push chars to stack
+    int oPar = 0;
+    int cPar = 0;
+    
+    for(int i = 0; i < expr.length(); i++){
+       
+        if(expr[i] == '('){
+            oPar++;
+        } else if (expr[i] == ')'){
+            cPar++;
+        }
+    }
+
+    //check for mismatched paranthesis
+    if(oPar != cPar){
+        throw std::runtime_error("Mismatched paranthesis.");
+    }
+
+
+    
+    return root;
+}*/

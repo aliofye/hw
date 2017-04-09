@@ -28,7 +28,7 @@ int main() {
     int expected = -21;
     bool expectException = false;
     
-    // exprTree will hold a tree with the expression (3 + 4) * (2 - 5)
+    /*
     ITNode* exprTree = new ITNode(Item('*'));
     exprTree->_left = new ITNode(Item('+'));
     exprTree->_right = new ITNode(Item('-'));
@@ -38,7 +38,23 @@ int main() {
     current = exprTree->_right;
     current->_left = new ITNode(Item(2));
     current->_right = new ITNode(Item(5));
-    //////////////////////////////////////////////////////////////////////
+    */
+
+    
+    ITNode* exprTree = new ITNode(Item('*'));
+    exprTree->_left = new ITNode(Item('*'));
+    exprTree->_right = new ITNode(Item(10));
+    ITNode* current = exprTree->_left;
+    current->_left = new ITNode(Item('+'));
+    current->_right = new ITNode(Item('-'));
+    current = current->_left;
+    current->_left = new ITNode(Item(2));
+    current->_right = new ITNode(Item(5));
+    current = exprTree->_left;
+    current = current->_right;
+    current->_left = new ITNode(Item(5));
+    current->_right = new ITNode(Item(8));
+    
     
     ItemStack s;
     
@@ -73,6 +89,7 @@ int main() {
     }
 
     try {
+        expected = -210;
         // Convert expression in tree to a stack.
         s = generateStack(exprTree);
 

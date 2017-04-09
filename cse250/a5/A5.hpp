@@ -5,6 +5,8 @@
 #include "ITNode.hpp"
 #include <stack>
 #include <string>
+#include <stdexcept>
+
 
 // Defines the type "ItemStack" to be an STL stack
 // holding Items.
