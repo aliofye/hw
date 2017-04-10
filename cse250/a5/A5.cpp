@@ -10,23 +10,49 @@
  * @throw runtime_error: if stack is holding an invalid expression, throw
  *                       a runtime error.
  */
+
+void validate(ItemStack& valStack){
+    
+    if(valStack.empty()){
+        throw std::runtime_error("Malformed expression.");
+    } else if(valStack.size() == 1 && valStack.top().getType() != VAL){
+        throw std::runtime_error("Malformed expression.");
+    } else if(valStack.size() == 2){
+        throw std::runtime_error("Malformed expression.");
+    }
+
+
+    int val = 0;
+    int op = 0;
+
+    while(!valStack.empty()){
+        Item token = valStack.top();
+        valStack.pop();
+
+        if(token.getType() == VAL){
+            val++;
+        } else {
+            op++;
+        }
+    }
+
+    if(op != (val - 1)){
+        throw std::runtime_error("Malformed expression.");
+    }
+}
 void eval(ItemStack& exprStack) {
    
-    std::stack<Item> evalStack;
+    ItemStack evalStack;
 
     const int MIN_ARGS = 2;
     const int DIVIDE_BY_ZERO = 0;
     const int MAX_RESULT = 1;
     const int ONE_VALUE = 1;
 
-    if(exprStack.empty()){
+    
+    ItemStack valStack = exprStack;
 
-        throw std::runtime_error("Malformed expression.");
-
-    } else if(exprStack.size() == ONE_VALUE){
-
-        return;
-    }
+    validate(valStack);
 
     //while there are input tokens left
 
@@ -46,6 +72,7 @@ void eval(ItemStack& exprStack) {
 
     			//if there are less than 2 operands
     			throw std::runtime_error("Malformed expression.");
+
     		} else {
     			
     			Item one = evalStack.top();
@@ -53,11 +80,6 @@ void eval(ItemStack& exprStack) {
     			
     			Item two = evalStack.top();
     			evalStack.pop();
-
-                //if either of the operands is actually an operator
-                if(one.getType() != VAL || two.getType() != VAL){
-                    throw std::runtime_error("Malformed expression.");
-                }
 
                 int rhs = one.getVal();
     			int lhs = two.getVal();
