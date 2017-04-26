@@ -21,7 +21,6 @@ void validate(ItemStack& valStack){
         throw std::runtime_error("Malformed expression.");
     }
 
-
     int val = 0;
     int op = 0;
 
@@ -43,16 +42,13 @@ void validate(ItemStack& valStack){
 void eval(ItemStack& exprStack) {
    
     ItemStack evalStack;
+    evalStack = exprStack;
 
     const int MIN_ARGS = 2;
     const int DIVIDE_BY_ZERO = 0;
     const int MAX_RESULT = 1;
-    const int ONE_VALUE = 1;
-
     
-    ItemStack valStack = exprStack;
-
-    validate(valStack);
+    validate(evalStack);
 
     //while there are input tokens left
 
@@ -174,8 +170,10 @@ ItemStack generateStack(ITNode* root) {
 }
 
 
-/*ITNode* generateExprTree (std::string expr){
+ITNode* generateExprTree (std::string expr){
+    
     ITNode* root;
+    ItemStack stack;
     
     //count paranthesis and push chars to stack
     int oPar = 0;
@@ -183,11 +181,44 @@ ItemStack generateStack(ITNode* root) {
     
     for(int i = 0; i < expr.length(); i++){
        
+        int arr[35];
+
         if(expr[i] == '('){
             oPar++;
-        } else if (expr[i] == ')'){
+        } else if(expr[i] == ')'){
             cPar++;
+        } else if(expr[i] == ' '){
+            //skip
+        } else{
+
+            int num = expr[i] - '0';
+
+            int count = 0;
+            
+            if(num < 0 || num > 9){// if num is not an int
+                
+                Item token = num;
+                stack.push(token);
+
+            } else {// if num is an int
+                
+                arr[count] = num;
+                count++;
+
+                num = expr[i + 1] - '0';
+
+                while(num >= 0 || num <= 9){
+                    arr[count] = num;
+                    count++;
+                }
+
+                //get int from arr and push to stack
+
+                num =
+            }
+            
         }
+
     }
 
     //check for mismatched paranthesis
@@ -195,7 +226,25 @@ ItemStack generateStack(ITNode* root) {
         throw std::runtime_error("Mismatched paranthesis.");
     }
 
+    int val = 0;
+    int op = 0;
+
+    while(!stack.empty()){
+        Item token = stack.top();
+        stack.pop();
+
+        if(token.getType() == VAL){
+            val++;
+        } else {
+            op++;
+        }
+    }
+
+    if(op != (val - 1)){
+        throw std::runtime_error("Malformed expression.");
+    }
+
 
     
     return root;
-}*/
+}
