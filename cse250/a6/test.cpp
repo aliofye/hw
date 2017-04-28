@@ -31,7 +31,7 @@ int main()
 
 	std::cout << getHammingWeight(b) << std::endl;*/
 	int a = 1;
-	int b = 0;
+	int b = 10;
 	JobQueue jq;
 	Job newJob = Job(a, b);
 	jq.push(newJob);

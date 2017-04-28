@@ -19,9 +19,19 @@ public:
 class Compare {
 public:
  bool operator() (const Job& currentJob, const Job& newJob){
- 	return currentJob._priority > newJob._priority;
+ 	
+ 	if(currentJob._priority == newJob._priority){
+ 		
+ 		return currentJob._pid > newJob._pid;
+
+ 	} else {
+ 		
+ 		return currentJob._priority > newJob._priority;
+ 	
+ 	}
  }	
 };
+
 
 class JobQueue {
 private:
