@@ -38,7 +38,7 @@ int main()
 	a = 2; b = 1;
 	newJob = Job(a, b);
 	jq.push(newJob);
-	a = 5; b = 2;
+	a = 5; b = 3;
 	newJob = Job(a, b);
 	jq.push(newJob);
 	a = 4; b = 3;
