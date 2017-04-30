@@ -10,7 +10,7 @@ class TreeIterator {
 private:
 	
 public:
-	std::stack<QuadTreeNode*> nodestk;
+	std::stack<QuadTreeNode*> nodestk; 
 	
 	TreeIterator(QuadTreeNode* root) {
 	
