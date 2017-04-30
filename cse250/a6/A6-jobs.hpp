@@ -8,7 +8,7 @@ public:
 	int _pid;
 	int _priority;
 
-	Job(int& _pid, int& _priority){
+	Job(const int _pid, const int _priority){
 		
 		this->_pid = _pid;
 		this->_priority = _priority;
