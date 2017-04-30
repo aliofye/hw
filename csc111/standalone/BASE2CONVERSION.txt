@@ -1,0 +1,41 @@
+99.4
+
+BASE 2
+01100011.011001110
+
+BSN
+1.100011011001110x2^0110
+
+S	EXPONENT	 MANTISSA
+0 	01110101	 100011011001110
+	127=01111111=0
+	ADD 7
+	=0110110
+
+
+
+
+153.7
+
+BASE 2
+10011001.10110011
+
+BSN
+1.001100110110011X2^0111
+
+S	EXPONENT	MANTISSA
+0	01110110	001100110110011
+
+
+
+
+public static void pause (int ms)
+{
+	try
+	 {
+		Thread.sleep(ms);
+	 }
+	 catch(InterruptedException e)
+	 {
+	 }
+}
