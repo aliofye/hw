@@ -7,7 +7,13 @@ public:
 	QuadTreeNode* child[4];
 };
 
-void iterate(QuadTreeNode* root){
+class TreeIterator {
+private:
+	
+public:
+	std::stack<QuadTreeNode*> nodestk;
+
+	void iterate(QuadTreeNode* root){
 
 		if(root->child[0] != nullptr){
 			iterate(root->child[0]);
@@ -26,14 +32,7 @@ void iterate(QuadTreeNode* root){
 		}
 
 		nodestk.push(root);
-} 
-
-class TreeIterator {
-private:
-	
-public:
-	std::stack<QuadTreeNode*> nodestk;
-
+	} 
 	
 	TreeIterator(QuadTreeNode* root) {
 	
@@ -41,7 +40,6 @@ public:
 	}
 
 	TreeIterator& operator++() {
-		QuadTreeNode* node = nodestk.top();
 		nodestk.pop();
 	}
 		
