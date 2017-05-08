@@ -17,6 +17,7 @@ public:
 };
 
 class Compare {
+
 public:
  bool operator() (const Job& currentJob, const Job& newJob){
  	
@@ -34,9 +35,11 @@ public:
 
 
 class JobQueue {
+
 private:
 
 	std::priority_queue<Job, std::vector<Job>, Compare> queue;
+
 public:
 	void push(Job newJob){
 		queue.push(newJob);
