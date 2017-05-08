@@ -83,6 +83,10 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text){
     return count;
 }
 
+//part 2
+
+
+//part 3
 std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs, const std::string& text){
 	std::vector<unsigned int> count;
 
