@@ -1,5 +1,7 @@
 #include "A7.hpp"
 #include <vector>
+#include <algorithm>
+#include <iostream>
 //computes longest prefix suffix to preprocess the string 
 //for better time complexity using the Knuth Morris Pratt 
 //pattern searching algorithm
@@ -36,6 +38,7 @@ void computeLPS(const std::string& pat, const int M, int *lps)
     }
 }
 
+//part 1
 // Put your function definitions here.
 unsigned int countOccurrences(const std::string& seq, const std::string& text){
 	
@@ -43,7 +46,6 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text){
 	
 	int M = seq.length();
     int N = text.length();
-    //const char* pat = seq.c_str();
  
     // create lps[] that will hold the longest prefix suffix
     // values for pattern
@@ -84,7 +86,9 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text){
 }
 
 //part 2
-
+std::vector<unsigned int> countOccurrences(const std::string& text){
+	
+}
 
 //part 3
 std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs, const std::string& text){
@@ -97,4 +101,33 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 
 	return count;
 }
+
+//bonus
+std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs, const std::string& text, bool bonus){
+
+	std::vector<unsigned int> count;
+	
+	std::vector<std::string> copy = seqs;
+	std::vector<std::string>::iterator start = copy.begin();
+	std::vector<std::string>::iterator end = copy.end();
+
+	sort(start, end); //sort iterator for next_permutation use
+
+	do{
+		std::string pat;
+		for(auto str : copy){
+			pat += str;
+		}
+		
+		std::cout << pat << std::endl;
+
+		int c = countOccurrences(pat, text);
+    	count.push_back(c);
+
+	} while(std::next_permutation(start, end));
+
+	
+	return count;
+}
+
 

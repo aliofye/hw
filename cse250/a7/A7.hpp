@@ -23,7 +23,7 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text);
  * @return: return the occurrence count of each 4 character string
  * (including those that are not present).
  */
-unsigned int countOccurrences(const std::string& text);
+std::vector<unsigned int> countOccurrences(const std::string& text);
 
 
 /**
