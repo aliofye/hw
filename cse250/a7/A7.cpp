@@ -1,7 +1,8 @@
 #include "A7.hpp"
 #include <vector>
 #include <algorithm>
-#include <iostream>
+#include <map>
+#include <set>
 //computes longest prefix suffix to preprocess the string 
 //for better time complexity using the Knuth Morris Pratt 
 //pattern searching algorithm
@@ -88,6 +89,55 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text){
 //part 2
 std::vector<unsigned int> countOccurrences(const std::string& text){
 	
+	std::map<std::string, unsigned int> map;
+	std::vector<unsigned int> count;
+	
+	bool print = true;
+
+	if(text.length() < 4){
+		print = false;
+	}
+
+	if(print){
+		for(char a='a'; a<='z'; ++a) {
+		    for(char b='a'; b<='z'; ++b) {
+		        for(char c='a'; c<='z'; ++c) {
+		            for(char d='a'; d<='z'; ++d){
+		            	
+		            	std::string word;
+		            	word += a;
+		            	word += b;
+		            	word += c;
+		            	word += d;
+
+		            	//do the good shit here
+		            	map.insert(std::pair<std::string, unsigned int>(word, 0));
+		            }
+		        }
+		    }
+		}
+
+		for (auto const& p : map)
+		{
+	    	int c = countOccurrences(p.first, text);
+	    				
+	    	if(c > 0){
+	  			map[p.first] = c;
+	    	}
+
+	    	count.push_back(p.second);
+		}
+
+	} else {
+		for(int i = 0; i < 456976; i++){
+			count.push_back(0);
+		}
+	}
+
+	
+
+	return count;
+
 }
 
 //part 3
@@ -119,13 +169,10 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 			pat += str;
 		}
 		
-		std::cout << pat << std::endl;
-
 		int c = countOccurrences(pat, text);
     	count.push_back(c);
 
 	} while(std::next_permutation(start, end));
-
 	
 	return count;
 }

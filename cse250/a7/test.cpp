@@ -4,7 +4,7 @@
 
 int main(){
 
-	std::string text = "aaaabab";
+	std::string text = "aaaa";
 	std::string pat = "aaa";
 	std::vector<std::string> seqs;
 	seqs.push_back("a");
@@ -21,7 +21,14 @@ int main(){
 	std::cout << "END PART ONE"<< std::endl; 
 
 	//test part 2
+	std::cout << "START PART TWO"<< std::endl; 
+	std::vector<unsigned int> vcount = countOccurrences(text);
 	
+	for(int i = 0; i < 4; i++){
+		std::cout << "Number of times pattern appears: " << vcount.at(i) << std::endl;
+	}
+
+	std::cout << "END PART TWO"<< std::endl; 
 	
 	//test part 3
 	std::cout << "START PART THREE"<< std::endl;
