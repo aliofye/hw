@@ -22,12 +22,8 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text){
 
 				std::string str2 = str1.substr(0, j + 1);
 
-				if(str2 == seq){
-
-					//count number of occurances
-					pair.second++;
-
-				}
+				//count number of occurances
+				if(str2 == seq){ pair.second++; }
 			}
 
 		}
@@ -40,11 +36,8 @@ unsigned int countOccurrences(const std::string& seq, const std::string& text){
 
 				std::string str2 = str1.substr(0, j + 1);
 
-				if(str2 == seq){
-					//count number of occurances
-					pair.second++;
-
-				}
+				//count number of occurances
+				if(str2 == seq){ pair.second++; }
 			}
 		}
 	}
@@ -99,16 +92,12 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 	std::unordered_map<std::string, unsigned int> map;
 	std::unordered_map<std::string, unsigned int>::iterator it;
 
-	//evaluate max size of all seqs
 	unsigned int max = 0;
 
 	for(auto str : seqs){
 		
-		if(str.size() > max){
-
-			max = str.size();
-
-		}
+		//evaluate max size of all seqs
+		if(str.size() > max){ max = str.size(); }
 
 		map.insert(std::pair<std::string, unsigned int>(str, 0));
 	}
@@ -126,11 +115,8 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 
 				it = map.find(str2);
 
-				if(it != map.end()){
-
-					it->second++;
-
-				}
+				//count number of occurances
+				if(it != map.end()){ it->second++; }
 			}
 
 		}
@@ -145,11 +131,8 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 
 				it = map.find(str2);
 
-				if(it != map.end()){
-
-					it->second++;
-
-				}
+				//count number of occurances
+				if(it != map.end()){ it->second++; }
 			}
 		}
 	}
@@ -189,11 +172,8 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 			c++;
 
 			//this for loop will generate redundant pairs so they are removed
-			if(c >= (seqs.size() * seqs.size() - 1)){
+			if(c >= (seqs.size() * seqs.size() - 1)){ pair.push_back(pat); }
 
-				pair.push_back(pat);
-
-			}
 		}
 	}
 
@@ -247,11 +227,8 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 
 					it = map.find(str2);
 
-					if(it != map.end()){
-
-						it->second++;
-
-					}
+					//count number of occurances
+					if(it != map.end()){ it->second++; }
 				}
 
 			} catch(std::out_of_range e){
@@ -272,11 +249,8 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 
 					it = map.find(str2);
 
-					if(it != map.end()){
-
-						it->second++;
-
-					}
+					//count number of occurances
+					if(it != map.end()){ it->second++; }
 				}
 			} catch(std::out_of_range e){}
 		}
