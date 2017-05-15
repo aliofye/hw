@@ -1,136 +1,84 @@
 #include "A7.hpp"
 #include <vector>
 #include <algorithm>
-#include <map>
-#include <set>
-//computes longest prefix suffix to preprocess the string 
-//for better time complexity using the Knuth Morris Pratt 
-//pattern searching algorithm
-
-void computeLPS(const std::string& pat, const int M, int *lps)
-{
-    // length of the previous longest prefix suffix
-    int len = 0;
- 
-    lps[0] = 0; // lps[0] is always 0
- 
-    // the loop calculates lps[i] for i = 1 to M-1
-    int i = 1;
-    while (i < M)
-    {
-        if (pat[i] == pat[len])
-        {
-            len++;
-            lps[i] = len;
-            i++;
-        }
-        else // (pat[i] != pat[len])
-        {
-            if (len != 0)
-            {
-                len = lps[len-1];
-            }
-            else // if (len == 0)
-            {
-                lps[i] = 0;
-                i++;
-            }
-        }
-    }
-}
+#include <unordered_map>
 
 //part 1
-// Put your function definitions here.
 unsigned int countOccurrences(const std::string& seq, const std::string& text){
 	
-	unsigned int count = 0;
-	
-	int M = seq.length();
-    int N = text.length();
- 
-    // create lps[] that will hold the longest prefix suffix
-    // values for pattern
-    int lps[M];
- 
-    // Preprocess the pattern (calculate lps[] array)
-    computeLPS(seq, M, lps);
- 
-    int i = 0;  // index for text[]
-    int j  = 0;  // index for seq[]
-    while (i < N)
-    {
-        if (seq[j] == text[i])
-        {
-            j++;
-            i++;
-        }
- 
-        if (j == M)
-        {
-        	count++; //increment counter of found patterns
-            j = lps[j-1];
-        }
- 
-        // mismatch after j matches
-        else if (i < N && seq[j] != text[i])
-        {
-            // Do not match lps[0..lps[j-1]] characters,
-            // they will match anyway
-            if (j != 0)
-                j = lps[j-1];
-            else
-                i = i+1;
-        }
-    }
+	std::pair<std::string, unsigned int> pair(seq, 0);
 
+	unsigned int max = seq.length();
+	unsigned int limit = text.length();
+
+
+	if(limit > 0){
+
+		for(int i = 0; i < limit - max + 1; ++i){
+
+			std::string str1 = text.substr(i, max);
+
+			for(int j = 0; j < max; ++j){
+
+				std::string str2 = str1.substr(0, j + 1);
+
+				if(str2 == seq){
+
+					//count number of occurances
+					pair.second++;
+
+				}
+			}
+
+		}
+
+		for(int i = limit - max + 1; i < limit; ++i){
+
+			std::string str1 = text.substr(i, max);
+			
+			for(int j = 0; i + j < limit; ++j){
+
+				std::string str2 = str1.substr(0, j + 1);
+
+				if(str2 == seq){
+					//count number of occurances
+					pair.second++;
+
+				}
+			}
+		}
+	}
+	
+
+	unsigned int count = pair.second;
+	
     return count;
 }
 
 //part 2
 std::vector<unsigned int> countOccurrences(const std::string& text){
 	
-	std::map<std::string, unsigned int> map;
-	std::vector<unsigned int> count;
+	//initialize a vector to the maximum number of 4 letter combinations (26^4)
+	std::vector<unsigned int> count(456976, 0);
+
+	unsigned int limit = text.length();
 	
-	bool print = true;
-
-	if(text.length() < 4){
-		print = false;
-	}
-
-	if(print){
-		for(char a='a'; a<='z'; ++a) {
-		    for(char b='a'; b<='z'; ++b) {
-		        for(char c='a'; c<='z'; ++c) {
-		            for(char d='a'; d<='z'; ++d){
-		            	
-		            	std::string word;
-		            	word += a;
-		            	word += b;
-		            	word += c;
-		            	word += d;
-
-		            	//do the good shit here
-		            	map.insert(std::pair<std::string, unsigned int>(word, 0));
-		            }
-		        }
-		    }
-		}
-
-		for (auto const& p : map)
-		{
-	    	int c = countOccurrences(p.first, text);
-	    				
-	    	if(c > 0){
-	  			map[p.first] = c;
-	    	}
-
-	    	count.push_back(p.second);
-		}
+	//check to see if the text is less than 4 letters, meaning no occurances can be found
+	if(limit < 4){
+		
+		return count;
 
 	} else {
-		for(int i = 0; i < 456976; i++){
-			count.push_back(0);
+		
+		for(int i = 0; i < limit - 3; ++i){
+		
+			std::string str = text.substr(i, i + 4);
+					
+			//hash the string into an index, i.e. 'aaaa' = 0
+			int index = ((str[0] - 'a') * 26 * 26 * 26) + ((str[1] - 'a') * 26 * 26) + ((str[2] - 'a') * 26) + (str[3] - 'a');
+			
+			count.at(index)++;
+
 		}
 	}
 
@@ -142,12 +90,81 @@ std::vector<unsigned int> countOccurrences(const std::string& text){
 
 //part 3
 std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs, const std::string& text){
-	std::vector<unsigned int> count;
+	
+	
+	unsigned int size = seqs.size();
+	unsigned int limit = text.length();
+	
 
-	for (auto pat : seqs) {
-    	int c = countOccurrences(pat, text);
-    	count.push_back(c);
+	std::unordered_map<std::string, unsigned int> map;
+	std::unordered_map<std::string, unsigned int>::iterator it;
+
+	//evaluate max size of all seqs
+	unsigned int max = 0;
+
+	for(auto str : seqs){
+		
+		if(str.size() > max){
+
+			max = str.size();
+
+		}
+
+		map.insert(std::pair<std::string, unsigned int>(str, 0));
 	}
+
+	//check to see if text is not a null string
+	if(limit > 0){
+
+		for(int i = 0; i < limit - max + 1; ++i){
+
+			std::string str1 = text.substr(i, max);
+
+			for(int j = 0; j < max; ++j){
+
+				std::string str2 = str1.substr(0, j + 1);
+
+				it = map.find(str2);
+
+				if(it != map.end()){
+
+					it->second++;
+
+				}
+			}
+
+		}
+
+		for(int i = limit - max + 1; i < limit; ++i){
+
+			std::string str1 = text.substr(i, max);
+			
+			for(int j = 0; i+j < limit; ++j){
+
+				std::string str2 = str1.substr(0, j + 1);
+
+				it = map.find(str2);
+
+				if(it != map.end()){
+
+					it->second++;
+
+				}
+			}
+		}
+	}
+	
+
+	//take count of occurances in map in store in vector
+	std::vector<unsigned int> count(size, 0);
+
+
+	for(int i = 0; i < count.size(); ++i){
+
+		it = map.find(seqs.at(i));
+		count.at(i) = it->second;
+	}
+
 
 	return count;
 }
@@ -155,26 +172,126 @@ std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs,
 //bonus
 std::vector<unsigned int> countOccurrences(const std::vector<std::string>& seqs, const std::string& text, bool bonus){
 
-	std::vector<unsigned int> count;
+	unsigned int size = seqs.size();
 	
-	std::vector<std::string> copy = seqs;
-	std::vector<std::string>::iterator start = copy.begin();
-	std::vector<std::string>::iterator end = copy.end();
+	std::vector<std::string> pair;
+	
+	//counter to erase first seqs.size() * seqs.size() - 1 digits
+	unsigned int c = 0;
+	
+	//generate sequence pairs from (0, 0) to (0, n-1) ... (1,0) to (1, n-1) ...
+	for(int i = 0; i < size; ++i){
+		
+		for(int j = 0; j < size - 1; j++){
 
-	sort(start, end); //sort iterator for next_permutation use
+			std::string pat = seqs[i] + seqs[j];
 
-	do{
-		std::string pat;
-		for(auto str : copy){
-			pat += str;
+			c++;
+
+			//this for loop will generate redundant pairs so they are removed
+			if(c >= (seqs.size() * seqs.size() - 1)){
+
+				pair.push_back(pat);
+
+			}
+		}
+	}
+
+	//generate sequence pairs from (n-1, 0) to (n-1, n-1)
+	for(int i = size - 1; i >= 0; --i){
+
+		for(int j = size - 1; j >= 0; --j){
+
+			std::string pat = seqs[i] + seqs[j];
+
+			pair.push_back(pat);
+			
+		}
+	}
+
+	//push back means everything is stored in reverse order, so reverse back
+	std::reverse(pair.begin(), pair.end());
+
+
+	std::vector<unsigned int> count;
+
+	std::unordered_map<std::string, unsigned int> map;
+	std::unordered_map<std::string, unsigned int>::iterator it;
+	
+	unsigned int max = 0;
+
+
+	//insert each pair into map and calculate max size of string in pair
+	for(auto pat : pair){
+		if(pat.size() > max){
+			max = pat.size();
+		}
+
+		map.insert(std::pair<std::string, unsigned int>(pat, 0));
+	}
+
+	unsigned int limit = text.length();
+
+	if(limit > 0){
+
+		//find number of occurances from index 0 to limit - max + 1
+		for(int i = 0; i < limit - max + 1; ++i){
+
+			try{
+
+				std::string str1 = text.substr(i, max);
+
+				for(int j = 0; j < max; ++j){
+
+					std::string str2 = str1.substr(0, j + 1);
+
+					it = map.find(str2);
+
+					if(it != map.end()){
+
+						it->second++;
+
+					}
+				}
+
+			} catch(std::out_of_range e){
+				//e.what();
+			}
 		}
 		
-		int c = countOccurrences(pat, text);
-    	count.push_back(c);
+		//find number of occurances from index limit - max + 1 to limit
+		for(int i = limit - max + 1; i < limit; ++i){
+			
+			try{
 
-	} while(std::next_permutation(start, end));
+				std::string str1 = text.substr(i, max);
+				
+				for(int j = 0; i+j < limit; ++j){
+
+					std::string str2 = str1.substr(0, j + 1);
+
+					it = map.find(str2);
+
+					if(it != map.end()){
+
+						it->second++;
+
+					}
+				}
+			} catch(std::out_of_range e){}
+		}
+	}
 	
+	//iterate through map and push count
+	for(auto pat : pair){
+
+		it = map.find(pat);
+		count.push_back(it->second);
+	}
+
 	return count;
 }
+
+
 
 

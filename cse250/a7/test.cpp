@@ -4,13 +4,16 @@
 
 int main(){
 
-	std::string text = "aaaa";
-	std::string pat = "aaa";
+	std::string text = "aaaabaaaa";
+	std::string pat = "a";
 	std::vector<std::string> seqs;
 	seqs.push_back("a");
-	seqs.push_back("aa");
 	seqs.push_back("ab");
-	seqs.push_back("aab");
+	seqs.push_back("b");
+	seqs.push_back("a");
+	seqs.push_back("ba");
+
+	//2,1,0,0,2
 
 
 
@@ -24,9 +27,11 @@ int main(){
 	std::cout << "START PART TWO"<< std::endl; 
 	std::vector<unsigned int> vcount = countOccurrences(text);
 	
-	for(int i = 0; i < 4; i++){
-		std::cout << "Number of times pattern appears: " << vcount.at(i) << std::endl;
-	}
+	std::cout << "Number of times pattern aaaa: " << vcount.at(0) << std::endl;
+
+	std::cout << "Number of times pattern aaab: " << vcount.at(1) << std::endl;
+
+	std::cout << "Number of times pattern zzzz: " << vcount.at(vcount.size() - 1) << std::endl;
 
 	std::cout << "END PART TWO"<< std::endl; 
 	
@@ -40,16 +45,19 @@ int main(){
 	
 	//test bonus
 	std::cout << "START BONUS"<< std::endl;
+	
 	std::string text2 = "tooo";
+	
 	std::vector<std::string> seqs2;
 	seqs2.push_back("to");
 	seqs2.push_back("o");
-
+	
 	std::vector<unsigned int> cvector2 = countOccurrences(seqs2, text2, true);
 	for(auto c : cvector2){
 		std::cout << "Number of times pattern appears: " << c << std::endl; 
 	}
 	std::cout << "END BONUS"<< std::endl;
+	
 	
 	return 0;
 }
