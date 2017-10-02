@@ -1,88 +1,66 @@
 #include<stdio.h>
 #include <ctype.h>
 #include <math.h>
-
-int duplicates[100][3];
-int pos = 0;
-char last[3];
-
-void printArray(int arr[], int arr_size, int score){
-    //declare constants
-    const unsigned short CONVERSION = 7;
-    const unsigned short TRIE = 3;
-    const unsigned short KICK = 2;
-
-    int c=0;
-    int t=0;
-    int k=0;
-
-
-    int i;
-    for (i = 0; i < arr_size; i++){
-        switch(arr[i]){
-            case 2:
-                k++;
-                break;
-            case 3:
-                t++;
-                break;
-            case 7:
-                c++;
-                break;
-        }
-    }
-
-    int total = (c*CONVERSION) + (t*TRIE) + (k*KICK);
-    char current[] = {(char) c, (char) t, (char) k};
+ 
+void printCombinations(int combination[]){
     
-    //check equality
-    int eqCount = 0;
-    for(i=0; i<3; ++i){
-        if(last[i] == current[i]){
-            eqCount++;
-        }
-    }
+    printf("%d", combination[0]);
+    printf("%2d", combination[1]);
+    printf("%2d", combination[2]);
 
-    if(total == score && eqCount!=3){
-        printf("%d", c);
-        printf("%2d", t);
-        printf("%2d\n", k);
-
-        last[0] = (char) c;
-        last[1] = (char) t;
-        last[2] = (char) k;
-
-        /*
-        duplicates[pos][0] = c;
-        duplicates[pos][1] = t;
-        duplicates[pos][2] = k;
-
-        pos++;*/
-    }  
+    printf("\n");
 }
-
-void printCompositions(int n, int i, int score){
-        /* array must be static as we want to keep track
-        of values stored in arr[] using current calls of
-        printCompositions() in function call stack*/
-        static int arr[100];
-         
-        if (n == 0)
-        {
-            printArray(arr, i, score);
-        }
-        else if(n > 0)
-        {
-            int k; 
-            for (k = 2; k <= 7; k++)
-            {
-                arr[i]= k;
-                printCompositions(n-k, i+1, score);
+void getCombinations(int score, int points[], int combination[], int index){
+    // not the last type of coin
+        if (index < 2) {
+            // if we have not reached our goal value yet
+            if (score > 0) {
+                int pointValue = points[index];
+                if (pointValue <= score) {
+                    // try all possible numbers of current coin given the amount
+                    // that is left
+                    int i=0;
+                    for (i = 0; i <= score / pointValue; i++) {
+                        combination[index] = i;
+                        getCombinations(score - pointValue * i, points, combination, index + 1);
+                    }
+                    // reset the current coin amount to zero before recursing
+                    combination[index] = 0;
+                }
+                // case when there is a coin whose value is greater than the goal
+                else {
+                    getCombinations(score, points, combination,index);
+                }
+            }
+            // we've reached our goal, print out the current coin amounts
+            else {
+                printCombinations(combination);
             }
         }
-    }
- 
+        // last type of coin
+        else {
+            // if we have not reached our goal value yet
+            if (score > 0) {
+                int pointValue = points[index];
+                if (pointValue <= score) {
+                    // if the remainder of our goal is evenly divisble by our last
+                    // coin value, we can make the goal amount
+                    if (score % pointValue == 0) {
+                        // add last coin amount and print current values out
+                        combination[index] = score/pointValue;
+                        printCombinations(combination);
 
+                        // reset this coin amount to zero before recursing
+                        combination[index] = 0;
+                    }
+                }
+            }
+            // we've reached our goal, print out the current coin amounts
+            else {
+                printCombinations(combination);
+            }
+    }
+}
 int main(){
     
    	//get score
@@ -91,19 +69,9 @@ int main(){
 
 
     int points[3] = {7,3,2};
+    int combination[3] = {0};
 
-    printCompositions(score, 0, score);
-
-    /*int i=0;
-    for(i=0; i<100; ++i){
-        
-        int j=0;
-        for (j=0; j < 3; ++j){
-           printf("%d", duplicates[i][j]);
-        }
-
-        printf("\n");
-    }*/
+    getCombinations(score, points, combination,0);
 
     return 0;
 }
