@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Stack;
 
 public class Solution {
 
     private HashMap<Integer, ArrayList<Integer>> graph;
-    ArrayList<Integer> output = new ArrayList<>();;
+
     boolean foundCycle = false;
 
 
@@ -20,65 +19,51 @@ public class Solution {
 
     public ArrayList<Integer> findCycle() {
         
-        int start = 0;
+        HashSet<Integer> visited = new HashSet<>();
+        ArrayList<Integer> output = new ArrayList<>();
+ 
+        for(int i = 0; i<graph.size(); ++i){
+            if(!foundCycle){
+                output = new ArrayList<>();
+                visited = new HashSet<>();
 
-        dfs(start);
+                dfs(i,i,visited, output);
+                                
+            }
+        }
+
+        if(!foundCycle){
+            output = new ArrayList<>();
+        }
 
         return output;
     }
 
-    void dfs(int start){
-        HashSet<Integer> visited = new HashSet<>();
-        Stack<Integer> stack = new Stack<>();
+    void dfs(int n, int goal, HashSet visited, ArrayList<Integer> output){
+        
+        System.out.println(" ");
+        System.out.println("Check: " + n + " " + goal);
 
-        stack.push(start);
+        visited.add(n);
+        
+        output.add(n);
+        
+        ArrayList<Integer> adj = graph.get(n);
+        
 
-        while(!stack.isEmpty()){
-            //pop node
-            int current = stack.pop();
-            //check if current was visited
-            if(!visited.contains(current)){
-               //mark visited
-                visited.add(current);
-                System.out.println(current);
-
-
-                ArrayList<Integer> adjacencyList = graph.get(current);
-
-                for(int i = adjacencyList.size()-1; i>=0; --i){
-                    int node = adjacencyList.get(i);
-                    if(!visited.contains(node)){
-                        stack.push(node);
-
-                        /*ArrayList<Integer> nodeAdjacencyList = graph.get(node);
-                        ArrayList<Integer> startAdjacencyList = graph.get(start);
-
-                        for(int temp : startAdjacencyList){
-                            if(nodeAdjacencyList.contains(temp)){
-                                foundCycle = true;
-                                break;
-                            }
-                        }*/
-                    } 
-                }
-                
+        for(int node : adj){
+  
+            System.out.print(node +  ", ");
+ 
+            if(node == goal && output.size() > 2 && graph.get(node).size() > 1){
+                foundCycle = true;
             }
             
-            if(foundCycle){
-                break;
-            }
-
-            
-        }
-
-        for(int node : visited){
-            if(graph.get(node).size() > 1){
-               output.add(node); 
-            } else {
-               foundCycle = false;
-               output = new ArrayList<>();
-            }
+            if (!visited.contains(node) && !foundCycle && graph.get(node).size() > 1){    
+               dfs(node, goal, visited, output);
+            }   
         }
     }
+    
 }
 
