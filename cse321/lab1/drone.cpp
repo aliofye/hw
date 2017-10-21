@@ -1,90 +1,123 @@
 #include <iostream>
 #include <unistd.h>
+#include <mutex>
 
-#define NBLOCKS 10
+#define NBLOCKS 20
 #define OBSTACLE 5
 #define CHARTED 1
 #define UNCHARTED 0
 
+std::mutex p;
+
 class Drone{
 private:
-	int id;
-	int end_x;
-	int end_y;
-	int marked_path[NBLOCKS][NBLOCKS] = {0};
-	void move(int xstep, int ystep);
-	void print_map(int (&map)[NBLOCKS][NBLOCKS]);
+	int id;												//drone id
+	int status; 										//0 if not delivered, 1 if it did
+	int marked_path[NBLOCKS][NBLOCKS] = {0};			//path taken by drone to reach delivery
+	void move(int xstep, int ystep);					//movement using manhattan bullshit thingy
+	void print_map(char (&map)[NBLOCKS][NBLOCKS]);		//prints the map at each move to display drone movement
+	void set_pos(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS], int x, int y, char id);
 public:
 	int curr_x;
 	int curr_y;
 
 	Drone(){} //empty constructor
 	
-	Drone(int id, int end_x, int end_y){
+	Drone(int id){
 		this->id = id;
-		this->end_x = end_x;
-		this->end_y = end_y;
 		curr_x = 0;
 		curr_y = 0;
+		status = 0;
 	}
 
-	bool deliver(int (&map)[NBLOCKS][NBLOCKS], int x, int y);
+	bool deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS], int x, int y, int goal_x, int goal_y);
+	void report_back(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS]);	//go back to DCAS
+
 	
 };
 
 void Drone::move(int xstep, int ystep){
-	
 	curr_x += xstep;
 	curr_y += ystep;
 }
 
-bool Drone::deliver(int (&map)[NBLOCKS][NBLOCKS], int x, int y){
+void Drone::set_pos(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS], int x, int y, char id){
+	while(1){
+		if(mutexes[x][y].try_lock()){
+			if(map[x][y] != 'A' /*&& map[x][y] != 'X'*/){
+				map[x][y] = id;
+			}
+			print_map(map);
+			mutexes[x][y].unlock();
+			return;
+		}
+	}
 	
-	if(x == end_x && y == end_y){
+}
+
+bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS],int x, int y, int goal_x, int goal_y){
+	
+	if(x == goal_x && y == goal_y){
+		status = 1;				//delivery successful
 		return true;
 	}
 
-	if(map[x][y] == OBSTACLE || marked_path[x][y] == CHARTED){
+	if(map[x][y] == '@' || marked_path[x][y] == CHARTED){
 
 		return false;
 	}
 
+	//mark block as charted
 	marked_path[x][y] = CHARTED;
-	map[x][y] = 1;
-	print_map(map);
-	map[x][y] = 0;
+	
+	//update map
+	set_pos(map,mutexes, x,y, 'a' + id);
+	set_pos(map,mutexes,x,y,'.');
 
 	if (x != 0) // Checks if not on left edge  
-        if (deliver(map, x-1, y)) { // Recalls method one to the left
+        if (deliver(map, mutexes, x-1, y, goal_x, goal_y)) { // Recalls method one to the left
 			move(-1,0);
             return true;
         }
     if (x != NBLOCKS - 1) // Checks if not on right edge
-        if (deliver(map, x+1, y)) { // Recalls method one to the right
+        if (deliver(map, mutexes, x+1, y, goal_x, goal_y)) { // Recalls method one to the right
 			move(1,0);
             return true;
         }
     if (y != 0)  // Checks if not on top edge    
-        if (deliver(map, x, y-1)) { // Recalls method one up
+        if (deliver(map, mutexes, x, y-1, goal_x, goal_y)) { // Recalls method one up
 			move(0,-1);
 	        return true;
         }
     if (y != NBLOCKS - 1) // Checks if not on bottom edge     
-        if (deliver(map, x, y+1)) { // Recalls method one down
+        if (deliver(map, mutexes, x, y+1, goal_x, goal_y)) { // Recalls method one down
 			move(0,1);
             return true;
         }
 
+    //mark block as uncharted
+	//marked_path[x][y] = UNCHARTED;
     return false;
 }
 
-void Drone::print_map(int (&map)[NBLOCKS][NBLOCKS]){
-	usleep(100000);
+void Drone::print_map(char (&map)[NBLOCKS][NBLOCKS]){
+	//delay print and clear
+	usleep(5000);
 	system("clear");
+	//print every block
 	for(int i=0; i<NBLOCKS; i++){
 		for(int j=0; j<NBLOCKS; j++){
-			printf("%3i", map[i][j]);
+			printf("%3c", map[i][j]);
 		}
 		printf("%s\n", "");
 	}
+}
+
+void Drone::report_back(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS]){	
+	//reset charted path to 0
+	for (int i = 0; i < NBLOCKS; i++)
+    	std::fill(marked_path[i], marked_path[i] + NBLOCKS, 0);
+
+    //send drone back to motherbase
+	deliver(map, mutexes,curr_x, curr_y,0,0);
 }
