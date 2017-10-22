@@ -26,20 +26,8 @@ void launch_drone(int *id)
 		map[x][y] = 'X';
        	
        	drones[*id].deliver(map, mutexes, 0, 0, x, y);
-       	drones[*id].report_back(map, mutexes);
-}
-
-void print_map(char (&map)[NBLOCKS][NBLOCKS]){
-	//delay print and clear
-	usleep(5000);
-	system("clear");
-	//print every block
-	for(int i=0; i<NBLOCKS; i++){
-		for(int j=0; j<NBLOCKS; j++){
-			printf("%3c", map[i][j]);
-		}
-		printf("%s\n", "");
-	}
+       	//UNCOMMENT LINE BELOW TO SEE DRONES GO BACK TO AIRPORT
+       	//drones[*id].report_back(map, mutexes);
 }
 
 int main(int argc, char const *argv[])
@@ -80,8 +68,9 @@ int main(int argc, char const *argv[])
 
 
 	//check final locations of drones
+	printf("%s\n", "Compare final steps above, to final position below!");
 	for(int i=0; i<NDRONES; i++){
-		std::cout << drones[i].curr_x << ", " << drones[i].curr_y << std::endl;
+		std::cout << i << ": " << drones[i].curr_x << ", " << drones[i].curr_y << std::endl;
 	}
 	return 0;
 }

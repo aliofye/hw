@@ -47,7 +47,7 @@ void Drone::set_pos(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 			if(map[x][y] != 'A' /*&& map[x][y] != 'X'*/){
 				map[x][y] = id;
 			}
-			print_map(map);
+	
 			mutexes[x][y].unlock();
 			return;
 		}
@@ -57,8 +57,10 @@ void Drone::set_pos(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 
 bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS],int x, int y, int goal_x, int goal_y){
 	
+	
 	if(x == goal_x && y == goal_y){
 		status = 1;				//delivery successful
+		std::cout << id << ": " << "(" << x << ", " << y << ")" << std::endl;
 		return true;
 	}
 
@@ -72,6 +74,7 @@ bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 	
 	//update map
 	set_pos(map,mutexes, x,y, 'a' + id);
+	std::cout << id << ": " << "(" << x << ", " << y << ")" << std::endl;
 	set_pos(map,mutexes,x,y,'.');
 
 	if (x != 0) // Checks if not on left edge  
@@ -102,7 +105,7 @@ bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 
 void Drone::print_map(char (&map)[NBLOCKS][NBLOCKS]){
 	//delay print and clear
-	usleep(5000);
+	usleep(50000);
 	system("clear");
 	//print every block
 	for(int i=0; i<NBLOCKS; i++){
