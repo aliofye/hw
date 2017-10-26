@@ -8,53 +8,32 @@
 #include <stdio.h>
 #include "string.h"
 
-int isPalindrome = 1;
+#define nchers 500
+int palindrome = 1;
+  
 
-int check(char *str){
+int check(char* str)
+{
     
-    int l = 0;
-    int h = strlen(str) - 1;
- 
-    while (h > l)
+    int count[nchers] = {0};
+  
+    
+    int i;
+    for (i = 0; str[i];  i++)
+        count[str[i]]++;
+  
+    int odd = 0;
+    
+    for (i = 0; i < nchers; i++)
     {
-        if (str[l++] != str[h--])
-        {
-            return isPalindrome;
-        }
+        if (count[i] & 1)
+            odd++;
+ 
+        if (odd > 1)
+            return 1;
     }
-    
-    isPalindrome = 0;
+  
     return 0;
-}
-
-void swap (char *x, char *y)
-{
-     char temp;
-     temp = *x;
-     *x = *y;
-     *y = temp;
-}
-
-void permute(char *a, int i, int n) 
-{
-    if(isPalindrome == 0){
-         return;
-    }
-    
-    int j; 
-
-    if (i == n){
-
-      isPalindrome = check(a);
-
-    } else {
-     
-        for (j = i; j <= n; j++){
-            swap((a+i), (a+j));
-            permute(a, i+1, n);
-            swap((a+i), (a+j)); 
-        }
-    }
 }
 
 int main() {
@@ -62,9 +41,9 @@ int main() {
     
     scanf("%s", string);
 
-    permute(string,0, strlen(string)-1);
+    palindrome = check(string);
 
-    if(isPalindrome == 0){
+    if(palindrome == 0){
       printf("%s\n", "yes");
     } else {
       printf("%s\n", "no");

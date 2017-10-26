@@ -42,12 +42,18 @@ void Drone::move(int xstep, int ystep){
 }
 
 void Drone::set_pos(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS], int x, int y, char id){
+	int dx = x-curr_x;
+	int dy = y-curr_y;
+
 	while(1){
 		if(mutexes[x][y].try_lock()){
+			move(dx, dy);
 			if(map[x][y] != 'A' /*&& map[x][y] != 'X'*/){
+				map[x][y] = '.';
 				map[x][y] = id;
 			}
-	
+			
+			usleep(125000);
 			mutexes[x][y].unlock();
 			return;
 		}
@@ -60,7 +66,7 @@ bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 	
 	if(x == goal_x && y == goal_y){
 		status = 1;				//delivery successful
-		std::cout << id << ": " << "(" << x << ", " << y << ")" << std::endl;
+		//std::cout << id << ": " << "(" << x << ", " << y << ")" << std::endl;
 		return true;
 	}
 
@@ -73,28 +79,28 @@ bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 	marked_path[x][y] = CHARTED;
 	
 	//update map
-	set_pos(map,mutexes, x,y, 'a' + id);
-	std::cout << id << ": " << "(" << x << ", " << y << ")" << std::endl;
-	set_pos(map,mutexes,x,y,'.');
+	set_pos(map,mutexes, x,y, 'a'+ id);
+	//std::cout << id << ": " << "(" << x << ", " << y << ")" << std::endl;
+
 
 	if (x != 0) // Checks if not on left edge  
         if (deliver(map, mutexes, x-1, y, goal_x, goal_y)) { // Recalls method one to the left
-			move(-1,0);
+			//move(-1,0);
             return true;
         }
     if (x != NBLOCKS - 1) // Checks if not on right edge
         if (deliver(map, mutexes, x+1, y, goal_x, goal_y)) { // Recalls method one to the right
-			move(1,0);
+			//move(1,0);
             return true;
         }
     if (y != 0)  // Checks if not on top edge    
         if (deliver(map, mutexes, x, y-1, goal_x, goal_y)) { // Recalls method one up
-			move(0,-1);
+			//move(0,-1);
 	        return true;
         }
     if (y != NBLOCKS - 1) // Checks if not on bottom edge     
         if (deliver(map, mutexes, x, y+1, goal_x, goal_y)) { // Recalls method one down
-			move(0,1);
+			//move(0,1);
             return true;
         }
 
@@ -104,7 +110,7 @@ bool Drone::deliver(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS
 }
 
 void Drone::print_map(char (&map)[NBLOCKS][NBLOCKS]){
-	//delay print and clear
+	/*//delay print and clear
 	usleep(50000);
 	system("clear");
 	//print every block
@@ -113,13 +119,16 @@ void Drone::print_map(char (&map)[NBLOCKS][NBLOCKS]){
 			printf("%3c", map[i][j]);
 		}
 		printf("%s\n", "");
-	}
+	}*/
 }
 
 void Drone::report_back(char (&map)[NBLOCKS][NBLOCKS], std::mutex (&mutexes)[NBLOCKS][NBLOCKS]){	
 	//reset charted path to 0
-	for (int i = 0; i < NBLOCKS; i++)
-    	std::fill(marked_path[i], marked_path[i] + NBLOCKS, 0);
+	for (int i = 0; i < NBLOCKS; i++){
+    	for(int j = 0; j < NBLOCKS; j++){
+    		marked_path[i][j] = 0;
+    	}
+    }
 
     //send drone back to motherbase
 	deliver(map, mutexes,curr_x, curr_y,0,0);

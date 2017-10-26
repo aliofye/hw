@@ -2,12 +2,13 @@
 #include <thread>
 #include <stdlib.h>
 
-#define NDRONES 10
+#define NDRONES 8
 
 char map[NBLOCKS][NBLOCKS];
 std::mutex mutexes[NBLOCKS][NBLOCKS];
 std::thread threads[NDRONES];
 Drone drones[NDRONES];
+bool refresh = true;
 
 void init_map(char (&map)[NBLOCKS][NBLOCKS]){
 	for(int i=0; i<NBLOCKS; i++){
@@ -30,10 +31,33 @@ void launch_drone(int *id)
        	//drones[*id].report_back(map, mutexes);
 }
 
+void print_map(){
+	//delay print and clear
+	system("clear");
+	//print every block
+	for(int i=0; i<NBLOCKS; i++){
+		for(int j=0; j<NBLOCKS; j++){
+			if(mutexes[i][j].try_lock())
+				printf("%3c", map[i][j]);
+			mutexes[i][j].unlock();
+		}
+		printf("%s\n", "");
+	}
+}
+
+void display_map(){
+	while(refresh){
+		usleep(125000);
+		print_map();
+	}
+}
+
 int main(int argc, char const *argv[])
 {
 
 	init_map(map);
+
+	std::thread print_thread(display_map);
 
 	//initiliaze airport to be A
 	map[0][0] = 'A';
@@ -66,6 +90,13 @@ int main(int argc, char const *argv[])
 			threads[i].join();
 	}
 
+	if(print_thread.joinable()){
+		print_thread.join();
+	}
+
+
+
+	refresh = false;
 
 	//check final locations of drones
 	printf("%s\n", "Compare final steps above, to final position below!");
