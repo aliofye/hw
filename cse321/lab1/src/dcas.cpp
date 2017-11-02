@@ -2,7 +2,7 @@
 #include <thread>
 #include <stdlib.h>
 
-#define NDRONES 8
+#define NDRONES 10
 
 char map[NBLOCKS][NBLOCKS];
 std::mutex mutexes[NBLOCKS][NBLOCKS];
@@ -20,15 +20,15 @@ void init_map(char (&map)[NBLOCKS][NBLOCKS]){
 
 void launch_drone(int *id)
 {
-       	int x = std::rand() % NBLOCKS;
-       	int y = std::rand() % NBLOCKS;
+       	int x = std::rand() % NBLOCKS + 1;
+       	int y = std::rand() % NBLOCKS + 1;
 
        	//set delivery point
 		map[x][y] = 'X';
        	
        	drones[*id].deliver(map, mutexes, 0, 0, x, y);
        	//UNCOMMENT LINE BELOW TO SEE DRONES GO BACK TO AIRPORT
-       	//drones[*id].report_back(map, mutexes);
+        drones[*id].report_back(map, mutexes);
 }
 
 void print_map(){
@@ -37,9 +37,7 @@ void print_map(){
 	//print every block
 	for(int i=0; i<NBLOCKS; i++){
 		for(int j=0; j<NBLOCKS; j++){
-			if(mutexes[i][j].try_lock())
-				printf("%3c", map[i][j]);
-			mutexes[i][j].unlock();
+			printf("%3c", map[i][j]);
 		}
 		printf("%s\n", "");
 	}
@@ -65,8 +63,8 @@ int main(int argc, char const *argv[])
 	//create artificial obstacles
 	for(int i=0; i<NDRONES; i++){
 		
-		int x = std::rand() % NBLOCKS;
-       	int y = std::rand() % NBLOCKS;
+		int x = std::rand() % NBLOCKS + 1;
+       	int y = std::rand() % NBLOCKS + 1;
 
        	map[x][y] = '@';
 	}
@@ -80,7 +78,7 @@ int main(int argc, char const *argv[])
 	//set up threads
 	for(int i=0; i<NDRONES; i++){
 		threads[i] = std::thread(launch_drone,&i);
-		usleep(100000);
+		usleep(125000);
 	}
 
 

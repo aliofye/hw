@@ -18,9 +18,7 @@ void test_print(node_t *list);
 
 int main(int argc, char const *argv[])
 {
-	//char str[12] = {'2','+','3','*','2','4','/','6','-','2','/','3'};
-	//char str[6] = {'1','6','-','4','*', '2'};
-
+	
 	char str[100];
 
 	scanf ("%s",str);
