@@ -1,6 +1,5 @@
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
 using namespace std;
 class Solution
@@ -36,29 +35,39 @@ vector<pair<int,int>> Solution::outputRallies()
     for(int i=0; i<rallies.size(); i++){
     	ordered_rallies.push_back(std::pair<int,std::pair<int,int>>(i,rallies[i]));
     }
-    
+
+
     //first we sort by finish time
     std::sort(ordered_rallies.begin(), ordered_rallies.end(), compare);
-
 
     int end = ordered_rallies.back().second.second;
     //std::cout << "End: " << end << std::endl;
     
     int curr_time = 0;
-    int last_time = 0;
+    int deadline = 0;
 
     //we iterate through every pair
     for(int i=0; i<ordered_rallies.size(); i++){
     	
 		std::pair<int, std::pair<int,int>> interval = ordered_rallies[i];
+		std::pair<int, std::pair<int,int>> next_interval = ordered_rallies[i+1];
+		
+		deadline += interval.second.first;
+
+
+		if(deadline > interval.second.second){
+				schedule.clear();
+				return schedule;
+		}
+
 		std::pair<int,int> result(interval.first, curr_time);
 		schedule.push_back(result);
 		curr_time+=interval.second.first;
 		
+    	//check if start time is bigger than the largest end time
     	if(curr_time > end){
-    		//std::cout << "Hey! I was called to clear dem schedules nahmean?!" << std::endl;
     		schedule.clear();
-    		break;
+    		return schedule;
     	}
     }
 
