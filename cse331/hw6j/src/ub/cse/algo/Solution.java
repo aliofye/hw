@@ -57,6 +57,7 @@ public class Solution {
         Collections.sort(ordered_rallies);
 
         int start = 0;
+        int deadline = 0;
         int endIndex = _n_rallies-1;
         int end = ordered_rallies.get(endIndex).deadline;
 
@@ -66,6 +67,13 @@ public class Solution {
             int pair[] = new int[2];
             pair[0] = interval.id;
             pair[1] = start;
+
+            deadline += interval.duration;
+
+            if(deadline > interval.deadline){
+                schedule = new ArrayList<>();
+                return schedule;
+            }
 
             schedule.add(pair);
             start+=interval.duration;
