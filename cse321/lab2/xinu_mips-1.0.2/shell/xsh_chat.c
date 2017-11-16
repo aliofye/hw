@@ -20,14 +20,16 @@ typedef struct {
 
 command xsh_chat(ushort stdout, ushort stdin, ushort stderr, ushort nargs, char *args[]){	
 	if(nargs == 2 && strncmp(args[1], "--help", 6) == 0) {
-		fprintf(stdout, "Usage: chat USERNAME\n");
+		fprintf(stdout, "Usage: chat\n");
 		fprintf(stdout, "Log in to chat.\n");
+		fprintf(stdout, "First user is ""ali"" and password is ""pass""\n");
+		fprintf(stdout, "Second user is ""eyad"" and password is ""pass""\n");
 		fprintf(stdout, "\t--help\t display this help and exit\n");
 		return SYSERR;
 	}
 
 	
-	if (nargs > 2)
+	if (nargs > 1)
 	{
 		fprintf(stderr,"chat: too many arguments\n");
 		fprintf(stderr,"Try 'chat --help' for more information\n");
@@ -35,14 +37,14 @@ command xsh_chat(ushort stdout, ushort stdin, ushort stderr, ushort nargs, char 
 	}
 	
 	
-	int user;	
+	
 	Accounts accounts[2];
 	strcpy(accounts[0].id, "eyad");
 	strcpy(accounts[0].pwd, "pass");
 	strcpy(accounts[1].id, "ali");
 	strcpy(accounts[1].pwd, "pass");
 	
-	int status = 0;
+	
 	
 	char input_id[30];
 	char input_pwd[30];
@@ -52,6 +54,8 @@ command xsh_chat(ushort stdout, ushort stdin, ushort stderr, ushort nargs, char 
 	fprintf(stdout, "Enter the password: ");
 	read(stdin, input_pwd, 30);
 	
+	int user;
+	int status = 0; 
 	int i;
 	for(i = 0; i < 2; i++) {
 		if(strncmp(accounts[i].id, input_id, 3) == 0 && strncmp(accounts[i].pwd, input_pwd, 3)  == 0) { 
