@@ -19,16 +19,9 @@ Solution::Solution(unordered_map<int, vector<int>> _graph) : graph(_graph)
 {
 }
 
-class compare_weight{
-public:
-    bool operator()(pair<int,int> a,pair<int,int> b) {
-        return a.first > b.first;
-    }
-};
-
 
 vector<int> Solution::outputEdges() {
-    priority_queue<pair<int,int>, vector<pair<int,int>>, compare_weight> queue;
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> queue;
 
     //start prim
     //get graph size
@@ -40,7 +33,6 @@ vector<int> Solution::outputEdges() {
     vector<bool> mst_set(graph_size, false);
 
     key[root] = 0;
-    mst_set[root] = true;
 
     queue.push(make_pair(0, root));
 
