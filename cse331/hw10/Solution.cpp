@@ -51,10 +51,9 @@ vector<int> Solution::outputShortestPath() {
         int u = q.front();
         q.pop();
         visited[u] = false;
-        unordered_map<int,int> edges = out_edges[u];
-        for(auto it = edges.begin(); it != edges.end(); ++it){
+        for(auto it = out_edges[u].begin(); it != out_edges[u].end(); ++it){
             int v = it->first;
-            int w = edges[v];
+            int w = out_edges[u][v];
 
             if(distance[u] + w < distance[v]){
                 distance[v] = distance[u] + w;
