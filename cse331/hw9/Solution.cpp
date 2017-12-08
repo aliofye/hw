@@ -57,11 +57,11 @@ double distance(const pair<int,int> a, const pair<int,int> b){
 double closest(vector<pair<int,int>> points, int n, double d)
 {
     double min = d;  
- 
+
     for (int i = 0; i < n; ++i){
         for (int j = i+1; j < n && (points[j].second - points[i].second) < min; ++j){
             if (distance(points[i],points[j]) < min){
-                min = distance(points[i], points[j]);
+                return distance(points[i], points[j]);
             }
         }
     }
@@ -71,11 +71,19 @@ double closest(vector<pair<int,int>> points, int n, double d)
 double brute_compute(vector<pair<int,int>> points){
 	int n = points.size();
 	
+	if(n == 1){
+		return 0.0;
+	}
+
+	if(n == 2){
+		return distance(points[0], points[1]);
+	}
+
 	double min = DBL_MAX;
     for (int i = 0; i < n; ++i)
         for (int j = i+1; j < n; ++j)
             if (distance(points[i], points[j]) < min)
-                min = distance(points[i], points[j]);
+                return distance(points[i], points[j]);
     return min;
 }
 
