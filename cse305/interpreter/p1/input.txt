@@ -1,14 +1,4 @@
-push "lol"
-push 1
-push -0
-push :false:
-push :error:
-push 1
 push 5
-add
-push 6
-sub
-push lala123
-push lala
-push 123lala
+swap
+swap
 quit

@@ -42,25 +42,25 @@ def push_helper(line):
 	line = line.replace("push", "")
 	line = line.strip()
 	# try to match boolean or error literals
-	token = re.match(r"(:true:|:false:|:error:)", line)
+	token = re.match(r"^(:true:|:false:|:error:)$", line)
 	if token is not None:
 		token = token.group()
 		print("literals", token)
 		return token
 	# try to match strings
-	token = re.match(r'"(.*?)"', line)
+	token = re.match(r'^"(.*?)"$', line)
 	if token is not None:
-		token = token.group()
+		token = token.group(1)
 		print("strings", token)
 		return token
 	# try to match names
-	token = re.match(r"[a-zA-Z]+\d*", line)
+	token = re.match(r"^[a-zA-Z]+\d*$", line)
 	if token is not None:
 		token = token.group()
 		print("names", token)
 		return token
 	# try to match integers
-	token = re.match("\-?\d+", line)
+	token = re.match(r"^\-?\d+$", line)
 	if token is not None:
 		token = token.group()
 		if token == "-0":
@@ -83,8 +83,8 @@ def math_helper(stack, op):
 	if len(stack) <= 1:
 		stack.append(":error:")
 	else:
-		lhs = stack.pop()
 		rhs = stack.pop()
+		lhs = stack.pop()
 		try:
 			lhs = int(lhs)
 			rhs = int(rhs)
@@ -92,26 +92,26 @@ def math_helper(stack, op):
 			if "add" in op:
 				total = (lhs + rhs)
 			elif "sub" in op:
-				total = (rhs - lhs)
+				total = (lhs - rhs)
 			elif "mul" in op:
 				total = (lhs * rhs)
 			elif "div" in op:
 				# divison by zero
 				if rhs == 0:
 					raise ValueError("division by zero")
-				total = (lhs / rhs)
+				else:
+					total = (lhs / rhs)
 			elif "rem" in op:
 				# divison by zero
 				if rhs == 0:
 					raise ValueError("division by zero")
-				total = (lhs % rhs)
+				else:	
+					total = (lhs % rhs)
 			# append total
 			stack.append(total)
 		except ValueError:
-			lhs = str(lhs)
-			rhs = str(rhs)
-			stack.append(rhs)
 			stack.append(lhs)
+			stack.append(rhs)
 			stack.append(":error:")	
 	return stack
 
