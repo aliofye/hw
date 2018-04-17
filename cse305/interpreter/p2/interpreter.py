@@ -12,44 +12,46 @@ def interpreter(input, output):
 		if "push" in line:
 			token = push_helper(line)
 			stack.append(token)
-		if "pop" in line:
+		elif "pop" in line:
 			stack = pop_helper(stack)
-		if "add" in line:
+		elif "add" in line:
 			stack = math_helper(stack, dictionary, "add")
-		if "sub" in line:
+		elif "sub" in line:
 			stack = math_helper(stack, dictionary, "sub")
-		if "mul" in line:
+		elif "mul" in line:
 			stack = math_helper(stack, dictionary, "mul")
-		if "div" in line:
+		elif "div" in line:
 			stack = math_helper(stack, dictionary, "div")
-		if "rem" in line:
+		elif "rem" in line:
 			stack = math_helper(stack, dictionary, "rem")
-		if "neg" in line:
+		elif "neg" in line:
 			stack = neg_helper(stack, dictionary)
-		if "swap" in line:
+		elif "swap" in line:
 			stack = swap_helper(stack)
-		if "cat" in line:
+		elif "cat" in line:
 			stack = cat_helper(stack, dictionary)
-		if "and" in line:
+		elif "and" in line:
 			stack = bool_helper(stack, dictionary, "and")
-		if "or" in line:
+		elif "or" in line:
 			stack = bool_helper(stack, dictionary, "or")
-		if "equal" in line:
+		elif "equal" in line:
 			stack = math_helper(stack, dictionary, "equal")
-		if "lessThan" in line:
+		elif "lessThan" in line:
 			stack = math_helper(stack, dictionary, "lessThan")
-		if "bind" in line:
+		elif "bind" in line:
 			stack, dictionary = bind_helper(stack, dictionary)
-		if "quit" in line:
+		elif "if" in line:
+			stack = if_helper(stack, dictionary)
+		elif "quit" in line:
 			# print stack
 			while len(stack) != 0:
 				if len(stack) != 1:
 					output_file.write(str(stack.pop()[1]) + "\n");
 				else:
 					output_file.write(str(stack.pop()[1]));
-		pair = ("error", ":error:")
-		stack.append(pair)
-	
+		else:
+			pair = ("error", ":error:")
+			stack.append(pair)
 
 	#close streams
 	input_file.close()
@@ -255,6 +257,40 @@ def cat_helper(stack, dictionary):
 			pair = ("error", token)
 			stack.append(lhs)
 			stack.append(rhs)
+			stack.append(pair)
+
+	return stack
+
+def if_helper(stack, dictionary):
+	if len(stack) <= 2:
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
+	else:
+		x = stack.pop()
+		y = stack.pop()
+		z = stack.pop()
+		
+		try:
+			# check if operands are bound
+			z = unary_binds(dictionary, z)
+			
+			if z[0] != "boolean" or z[0] != "boolean":
+				raise ValueError('Not a Boolean')
+			
+			if z[1] == ":true:":
+				stack.append(y)
+			else:
+				stack.append(x)
+
+
+		except ValueError as e:
+			print(e)
+			token = ":error:"
+			pair = ("error", token)
+			stack.append(z)
+			stack.append(y)
+			stack.append(x)
 			stack.append(pair)
 
 	return stack

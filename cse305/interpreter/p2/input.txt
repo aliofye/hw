@@ -1,3 +1,5 @@
-push a
-7.5
+push :false:
+push 9
+push 8
+if
 quit
