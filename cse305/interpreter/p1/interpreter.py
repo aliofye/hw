@@ -27,6 +27,16 @@ def interpreter(input, output):
 			stack = neg_helper(stack)
 		if "swap" in line:
 			stack = swap_helper(stack)
+		if "cat" in line:
+			stack = cat_helper(stack)
+		if "and" in line:
+			stack = bool_helper(stack, "and")
+		if "or" in line:
+			stack = bool_helper(stack, "or")
+		if "equal" in line:
+			stack = math_helper(stack, "equal")
+		if "lessThan" in line:
+			stack = math_helper(stack, "lessThan")
 		if "quit" in line:
 			# print stack
 			while len(stack) != 0:
@@ -44,12 +54,19 @@ def push_helper(line):
 	# sanitize input
 	line = line.replace("push", "")
 	line = line.strip()
-	# try to match boolean or error literals
-	token = re.match(r"^(:true:|:false:|:error:)$", line)
+	# try to match error literals
+	token = re.match(r"^(:error:)$", line)
 	if token is not None:
 		token = token.group()
-		print("literal", token)
-		pair = ("literal", token)
+		print("error", token)
+		pair = ("error", token)
+		return pair
+	# try to match boolean or error literals
+	token = re.match(r"^(:true:|:false:)$", line)
+	if token is not None:
+		token = token.group()
+		print("boolean", token)
+		pair = ("boolean", token)
 		return pair
 	# try to match strings
 	token = re.match(r'^"(.*?)"$', line)
@@ -107,24 +124,34 @@ def math_helper(stack, op):
 			# switch operations
 			if "add" in op:
 				total = (lhs + rhs)
+				pair = ("number", total)
 			elif "sub" in op:
 				total = (lhs - rhs)
+				pair = ("number", total)
 			elif "mul" in op:
 				total = (lhs * rhs)
+				pair = ("number", total)
 			elif "div" in op:
 				# divison by zero
 				if rhs == 0:
 					raise ValueError("Division by zero")
 				else:
 					total = (lhs // rhs)
+					pair = ("number", total)
 			elif "rem" in op:
 				# divison by zero
 				if rhs == 0:
 					raise ValueError("Division by zero")
 				else:	
 					total = (lhs % rhs)
+					pair = ("number", total)
+			elif "equal" in op:
+				token = ":true:" if lhs == rhs else ":false:"
+				pair = ("boolean", token)
+			elif "lessThan" in op:
+				token = ":true:" if lhs < rhs else ":false:"
+				pair = ("boolean", token)
 			# append total
-			pair = ("number", total)
 			stack.append(pair)
 		except ValueError as e:
 			print(e)
@@ -163,11 +190,72 @@ def swap_helper(stack):
 		pair = ("error", token)
 		stack.append(pair)
 	else:
-		lhs = stack.pop()
 		rhs = stack.pop()
+		lhs = stack.pop()
 		# swap
-		stack.append(lhs)
 		stack.append(rhs)
+		stack.append(lhs)
 	return stack
 
-# interpreter("./input.txt", "./output.txt")
+def cat_helper(stack):
+	if len(stack) <= 1:
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
+	else:
+		rhs = stack.pop()
+		lhs = stack.pop()
+		
+		try:
+			if lhs[0] != "string" or rhs[0] != "string":
+				raise ValueError('Not a String')
+			token = lhs[1] + ' ' + rhs[1]
+			pair = ("string", token)
+			stack.append(pair)
+
+		except ValueError as e:
+			print(e)
+			token = ":error:"
+			pair = ("error", token)
+			stack.append(lhs)
+			stack.append(rhs)
+			stack.append(pair)
+
+	return stack
+
+def bool_helper(stack, op):
+	if len(stack) <= 1:
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
+	else:
+		rhs = stack.pop()
+		lhs = stack.pop()
+		
+		try:
+			if lhs[0] != "boolean" or rhs[0] != "boolean":
+				raise ValueError('Not a Boolean')
+			# extract truth values
+			left = True if "true" in lhs[1] else False
+			right = True if "true" in rhs[1] else False
+			# get truth value
+			token = ""
+			if "and" in op:
+				token = ":true:" if left and right else ":false:"
+			else:
+				token = ":true:" if left or right else ":false:"
+
+			pair = ("boolean", token)
+			stack.append(pair)
+
+		except ValueError as e:
+			print(e)
+			token = ":error:"
+			pair = ("error", token)
+			stack.append(lhs)
+			stack.append(rhs)
+			stack.append(pair)
+
+	return stack
+
+interpreter("./input.txt", "./output.txt")

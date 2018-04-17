@@ -1,4 +1,4 @@
-push 5
-push 10
-rem
+push a
+push :true:
+bind
 quit
