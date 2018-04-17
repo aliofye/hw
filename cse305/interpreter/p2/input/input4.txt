@@ -1,0 +1,7 @@
+push :true:
+push :false:
+and
+not
+push :false:
+or
+quit

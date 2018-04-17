@@ -1,0 +1,36 @@
+push A
+push 9
+bind
+push A
+push 10
+bind
+push A
+push A
+add
+push A
+push "9"
+bind
+push A
+push 9
+mul
+push b
+push 5
+bind
+push c
+swap
+bind
+push d
+push :true:
+bind
+push c
+push d
+bind
+push d
+push c
+and
+push "why was 6 afraid of 7?  because 7 8 "
+push A
+push "!"
+cat
+cat
+quit

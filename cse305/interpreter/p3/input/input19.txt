@@ -1,0 +1,12 @@
+fun double x
+let
+push x
+push x
+add
+end
+return
+funEnd
+push double
+push 2
+call
+quit

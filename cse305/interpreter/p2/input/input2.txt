@@ -1,0 +1,34 @@
+push "First in, "
+push "last out"
+cat
+push a
+push 3
+bind
+push b
+push 5
+bind
+push IsUnit
+swap
+bind
+push a
+push b
+mul
+push 10
+lessThan
+push FALSEmaybe
+swap
+bind
+push FALSEmaybe
+push :false:
+or
+push "FALSEmaybe is"
+push IsUnit
+push -15
+bind
+pop
+push IsUnit
+neg
+push "Last in, "
+push "first out"
+cat
+quit

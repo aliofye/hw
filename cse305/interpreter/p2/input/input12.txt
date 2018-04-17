@@ -1,0 +1,38 @@
+push RES
+let
+push 8
+push 5
+rem
+let
+push seven
+push 7
+bind
+push seven
+push 7
+div
+let
+push 2
+push 3
+add
+let
+push "do nested strings work?"
+push "perhaps"
+push 5
+push 67
+sub
+end
+add
+end
+add
+end
+add
+end
+bind
+push RES
+push RES
+add
+push RES
+sub
+push "equal"
+push RES
+quit

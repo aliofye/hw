@@ -1,0 +1,8 @@
+fun identity x
+push x
+return
+funEnd
+push identity
+push 1.2
+call
+quit

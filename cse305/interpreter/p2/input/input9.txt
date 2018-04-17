@@ -1,0 +1,8 @@
+push :false:
+push :true:
+push 11
+push 4
+if
+push 8
+if
+quit

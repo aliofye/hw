@@ -1,0 +1,39 @@
+let
+push a
+push 56
+bind
+let
+push b
+push 61
+bind
+let
+push b
+push a
+sub
+end
+push c
+swap
+bind
+push abc
+push 70
+bind
+push c
+push c
+mul
+end
+push twenty5
+swap
+bind
+push abc
+push 60
+add
+push twenty5
+push 1
+mul
+end
+push 25
+equal
+push abc
+push 7
+add
+quit

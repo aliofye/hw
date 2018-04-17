@@ -1,0 +1,25 @@
+fun double x
+push x
+push x
+add
+push f
+swap
+bind
+fun square b
+push b
+push b
+mul
+return
+funEnd
+push square
+push f
+call
+return
+funEnd
+push double
+push 3
+call
+push square
+push 5
+call
+quit

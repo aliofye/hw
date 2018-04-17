@@ -1,0 +1,8 @@
+Last in, first out
+15
+FALSEmaybe is
+:false:
+:unit:
+:unit:
+:unit:
+First in, last out

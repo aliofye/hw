@@ -1,0 +1,41 @@
+let
+let
+let
+let
+let
+let
+let
+push 5
+push 5
+mul
+push two5
+swap
+bind
+push two5
+push 0
+add
+end
+end
+end
+end
+end
+end
+end
+push two5
+add
+pop
+swap
+bind
+push b
+push 50
+bind
+pop
+push two5
+push b
+lessThan
+push two5
+push "is"
+push two5
+push 0
+add
+quit
