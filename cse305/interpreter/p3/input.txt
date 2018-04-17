@@ -1,2 +1,10 @@
-fun name2 name2
+let
+let
+push 1
+push 2
+add
+end
+push 3
+add
+end
 quit

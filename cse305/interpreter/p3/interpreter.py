@@ -3,6 +3,7 @@ import re
 keywords = ["push", "pop", "add", "sub", "mul", "div", "rem", "neg", "swap",
  			"cat", "and", "or", "not", "equal", "lessThan", "bind", "if", "let",
  			"end","fun", "funEnd", "quit"]
+
 class Scope():
 	def __init__(self):
 		self.stack = list()
@@ -18,26 +19,24 @@ def interpreter(input, output):
 	# open files
 	input_file = open(input, "r")
 	output_file = open(output, "w")
-	# initialize main scope
-	stack = list()
-	dictionary = dict()
 	# get commands
 	commands = list()
 	for line in input_file:
 		commands.append(line)
-	#iterate through lines in file
-	stack, dictionary = parse(stack, dictionary, commands)
+	# initialize main scope
+	scope = Scope()
+	scope = parse(scope, commands)
 	# output stack
-	while not not stack:
-		if len(stack) > 1:
-			output_file.write(str(stack.pop()[1]) + "\n");
+	while not not scope.stack:
+		if len(scope.stack) > 1:
+			output_file.write(str(scope.stack.pop()[1]) + "\n");
 		else:
-			output_file.write(str(stack.pop()[1]));
+			output_file.write(str(scope.stack.pop()[1]));
 	#close streams
 	input_file.close()
 	output_file.close()
 
-def parse(stack, dictionary, commands):
+def parse(scope, commands):
 	# reverse commands to pop in the right order
 	commands.reverse()
 	# while commands is not empty
@@ -47,55 +46,55 @@ def parse(stack, dictionary, commands):
 		
 		if "push" in command:
 			token = push_helper(line)
-			stack.append(token)
+			scope.stack.append(token)
 		elif "pop" in command:
-			stack = pop_helper(stack)
+			scope = pop_helper(scope)
 		elif "add" in command:
-			stack = math_helper(stack, dictionary, "add")
+			scope = math_helper(scope, "add")
 		elif "sub" in command:
-			stack = math_helper(stack, dictionary, "sub")
+			scope = math_helper(scope, "sub")
 		elif "mul" in command:
-			stack = math_helper(stack, dictionary, "mul")
+			scope = math_helper(scope, "mul")
 		elif "div" in command:
-			stack = math_helper(stack, dictionary, "div")
+			scope = math_helper(scope, "div")
 		elif "rem" in command:
-			stack = math_helper(stack, dictionary, "rem")
+			scope = math_helper(scope, "rem")
 		elif "neg" in command:
-			stack = neg_helper(stack, dictionary)
+			scope = neg_helper(scope)
 		elif "swap" in command:
-			stack = swap_helper(stack)
+			scope = swap_helper(scope)
 		elif "cat" in command:
-			stack = cat_helper(stack, dictionary)
+			scope = cat_helper(scope)
 		elif "and" in command:
-			stack = bool_helper(stack, dictionary, "and")
+			scope = bool_helper(scope, "and")
 		elif "or" in command:
-			stack = bool_helper(stack, dictionary, "or")
+			scope = bool_helper(scope, "or")
 		elif "not" in command:
-			stack = not_helper(stack, dictionary)
+			scope = not_helper(scope)
 		elif "equal" in command:
-			stack = math_helper(stack, dictionary, "equal")
+			scope = math_helper(scope, "equal")
 		elif "lessThan" in command:
-			stack = math_helper(stack, dictionary, "lessThan")
+			scope = math_helper(scope, "lessThan")
 		elif "bind" in command:
-			stack, dictionary = bind_helper(stack, dictionary)
+			scope = bind_helper(scope)
 		elif "if" in command:
-			stack = if_helper(stack, dictionary)
+			scope = if_helper(scope)
 		elif "let" in command:
-			stack, commands = let_helper(stack, dictionary, commands)
+			scope, commands = let_helper(scope, commands)
 		elif "end" in command:
-			stack = [stack.pop()]
+			scope.stack = [scope.stack.pop()]
 		elif "fun" in command:
-			stack, commands = fun_helper(line, stack, dictionary, commands)
+			scope, commands = fun_helper(line, scope, commands)
 		elif "funEnd" in command:
-			stack = [stack.pop()]
+			scope.stack = [scope.stack.pop()]
 		elif "quit" in command:
 			print("quit")
 		else:
 			pair = ("error", ":error:")
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
 	# return scoped stack and dictionary
-	return stack, dictionary
+	return scope
 
 def push_helper(line):
 	# sanitize input
@@ -144,29 +143,29 @@ def push_helper(line):
 	pair = ("error", token)
 	return pair
 
-def pop_helper(stack):
-	if not stack:
+def pop_helper(scope):
+	if not scope.stack:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		stack.pop()
-	return stack
+		scope.stack.pop()
+	return scope
 
-def math_helper(stack, dictionary, op):
-	if len(stack) <= 1:
+def math_helper(scope, op):
+	if len(scope.stack) <= 1:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		right = stack.pop()
-		left = stack.pop()
+		right = scope.stack.pop()
+		left = scope.stack.pop()
 
 		try:
 			# check if tokens are bound
-			lop, rop = binary_binds(dictionary, left, right);
+			lop, rop = binary_binds(scope.dictionary, left, right);
 			
 			if lop[0] != "number" or rop[0] != "number":
 				raise ValueError("NaN")
@@ -204,17 +203,17 @@ def math_helper(stack, dictionary, op):
 				token = ":true:" if lhs < rhs else ":false:"
 				pair = ("boolean", token)
 			# append total
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
 		except ValueError as e:
 			print(e)
-			stack.append(left)
-			stack.append(right)
+			scope.stack.append(left)
+			scope.stack.append(right)
 			token = ":error:"
 			pair = ("error", token)
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)	
-	return stack
+	return scope
 
 def binary_binds(dictionary, lop, rop):
 	if lop[0] == "name" and rop[0] == "name":
@@ -238,128 +237,128 @@ def unary_binds(dictionary, op):
 	return op
 
 
-def neg_helper(stack, dictionary):
-	if not stack:
+def neg_helper(scope):
+	if not scope.stack:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		op = stack.pop()
+		op = scope.stack.pop()
 		try:
 			# check if token is bound
-			token = unary_binds(dictionary, op)
+			token = unary_binds(scope.dictionary, op)
 			
 			if token[0] != "number":
 				raise ValueError('NaN')
 			num = int(token[1])
 			num = -num
 			pair = ("number", num)
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
 		except ValueError as e:
 			print(e)
-			stack.append(op)
+			scope.stack.append(op)
 			token = ":error:"
 			pair = ("error", token)
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
-	return stack
+	return scope
 
-def swap_helper(stack):
-	if len(stack) <= 1:
+def swap_helper(scope):
+	if len(scope.stack) <= 1:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
+		rhs = scope.stack.pop()
+		lhs = scope.stack.pop()
 		# swap
-		stack.append(rhs)
-		stack.append(lhs)
-	return stack
+		scope.stack.append(rhs)
+		scope.stack.append(lhs)
+	return scope
 
-def cat_helper(stack, dictionary):
-	if len(stack) <= 1:
+def cat_helper(scope):
+	if len(scope.stack) <= 1:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		right = stack.pop()
-		left = stack.pop()
+		right = scope.stack.pop()
+		left = scope.stack.pop()
 		
 		try:
 			# check if operands are bound
-			lhs, rhs = binary_binds(dictionary, left, right)
+			lhs, rhs = binary_binds(scope.dictionary, left, right)
 			
 			if lhs[0] != "string" or rhs[0] != "string":
 				raise ValueError('Not a String')
 			token = lhs[1] + rhs[1]
 			pair = ("string", token)
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
 
 		except ValueError as e:
 			print(e)
 			token = ":error:"
 			pair = ("error", token)
-			stack.append(left)
-			stack.append(right)
-			stack.append(pair)
+			scope.stack.append(left)
+			scope.stack.append(right)
+			scope.stack.append(pair)
 			print(pair)
 
-	return stack
+	return scope
 
-def if_helper(stack, dictionary):
-	if len(stack) <= 2:
+def if_helper(scope):
+	if len(scope.stack) <= 2:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		x = stack.pop()
-		y = stack.pop()
-		z = stack.pop()
+		x = scope.stack.pop()
+		y = scope.stack.pop()
+		z = scope.stack.pop()
 		
 		try:
 			# check if operands are bound
-			n = unary_binds(dictionary, z)
+			n = unary_binds(scope.dictionary, z)
 			
 			if n[0] != "boolean" or n[0] != "boolean":
 				raise ValueError('Not a Boolean')
 			
 			if n[1] == ":true:":
-				stack.append(y)
+				scope.stack.append(y)
 			else:
-				stack.append(x)
+				scope.stack.append(x)
 
 
 		except ValueError as e:
 			print(e)
 			token = ":error:"
 			pair = ("error", token)
-			stack.append(z)
-			stack.append(y)
-			stack.append(x)
-			stack.append(pair)
+			scope.stack.append(z)
+			scope.stack.append(y)
+			scope.stack.append(x)
+			scope.stack.append(pair)
 			print(pair)
 
-	return stack
+	return scope
 
-def not_helper(stack, dictionary):
-	if not stack:
+def not_helper(scope):
+	if not scope.stack:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		operand = stack.pop()
+		operand = scope.stack.pop()
 
 		try:
 			# check if operand is bound
-			op = unary_binds(dictionary, operand)
+			op = unary_binds(scope.dictionary, operand)
 
 			if op[0] != "boolean":
 				raise ValueError('Not a Boolean')
@@ -368,30 +367,30 @@ def not_helper(stack, dictionary):
 			# get negation
 			boolean = ":false:" if boolean else ":true:"
 			pair = ("boolean", boolean)
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
 		except ValueError as e:
 			print(e)
 			error = ":error:"
 			pair = ("error", error)
-			stack.append(operand)
-			stack.append(pair)
+			scope.stack.append(operand)
+			scope.stack.append(pair)
 			print(pair)
-		return stack
+		return scope
 
-def bool_helper(stack, dictionary, op):
-	if len(stack) <= 1:
+def bool_helper(scope, op):
+	if len(scope.stack) <= 1:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
+		rhs = scope.stack.pop()
+		lhs = scope.stack.pop()
 		
 		try:
 			# check if operands are bound
-			lhs, rhs = binary_binds(dictionary, lhs, rhs)
+			lhs, rhs = binary_binds(scope.dictionary, lhs, rhs)
 			
 			if lhs[0] != "boolean" or rhs[0] != "boolean":
 				raise ValueError('Not a Boolean')
@@ -406,24 +405,21 @@ def bool_helper(stack, dictionary, op):
 				token = ":true:" if lop or rop else ":false:"
 
 			pair = ("boolean", token)
-			stack.append(pair)
+			scope.stack.append(pair)
 			print(pair)
 
 		except ValueError as e:
 			print(e)
 			token = ":error:"
 			pair = ("error", token)
-			stack.append(lhs)
-			stack.append(rhs)
-			stack.append(pair)
+			scope.stack.append(lhs)
+			scope.stack.append(rhs)
+			scope.stack.append(pair)
 			print(pair)
 
-	return stack
+	return scope
 
-def let_helper(stack, dictionary, commands):
-	# init new scope
-	ls = list()
-	ld = dict()
+def let_helper(scope, commands):
 	lc = list()
 	# let counter
 	let = 0
@@ -440,19 +436,21 @@ def let_helper(stack, dictionary, commands):
 			end += 1
 
 	print("commands", lc)
-
-	ld = dictionary.copy()
-	ls, ld = parse(ls, ld, lc)
+	# init local scope
+	local_scope = Scope()
+	local_scope.stack = list()
+	local_scope.dictionary = scope.dictionary.copy()
+	local_scope = parse(local_scope, lc)
 	print("let")
-	print(ls)
+	print(local_scope.stack)
 	print("end")
-	pair = ls.pop()
-	stack.append(pair)
-	print(stack)
+	pair = local_scope.stack.pop()
+	scope.stack.append(pair)
+	print(scope.stack)
 
-	return stack, commands
+	return scope, commands
 
-def fun_helper(line, stack, dictionary, commands):
+def fun_helper(line, scope, commands):
 	words = line.split()
 	funName = words[1]
 	funArg = words[2]
@@ -470,48 +468,48 @@ def fun_helper(line, stack, dictionary, commands):
 	except ValueError as e:
 		print(e)
 
-	return stack, commands
+	return scope, commands
 
-def bind_helper(stack, dictionary):
-	if len(stack) <= 1:
+def bind_helper(scope):
+	if len(scope.stack) <= 1:
 		token = ":error:"
 		pair = ("error", token)
-		stack.append(pair)
+		scope.stack.append(pair)
 		print(pair)
 	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
+		rhs = scope.stack.pop()
+		lhs = scope.stack.pop()
 		
 		try:
 			if lhs[0] != "name":
 				raise ValueError('Not a Name')
 			if rhs[0] != "number" and rhs[0] != "string" and rhs[0] != "boolean" and rhs[0] != "unit" and rhs[0] != "name":
 				raise ValueError('Not a Valid Value')
-			if rhs[0] == "name" and rhs[1] not in dictionary:
+			if rhs[0] == "name" and rhs[1] not in scope.dictionary:
 				raise ValueError('Name is Unbound')
-			elif rhs[0] == "name" and rhs[1] in dictionary:
-				value = dictionary[rhs[1]]
-				dictionary[lhs[1]] = value 				
+			elif rhs[0] == "name" and rhs[1] in scope.dictionary:
+				value = scope.dictionary[rhs[1]]
+				scope.dictionary[lhs[1]] = value 				
 				token = ":unit:"
 				pair = ("unit", token)
-				stack.append(pair)
+				scope.stack.append(pair)
 				print(pair)
 			else:
-				dictionary[lhs[1]] = rhs 				
+				scope.dictionary[lhs[1]] = rhs 				
 				token = ":unit:"
 				pair = ("unit", token)
-				stack.append(pair)
+				scope.stack.append(pair)
 				print(pair)			
 
 		except ValueError as e:
 			print(e)
 			token = ":error:"
 			pair = ("error", token)
-			stack.append(lhs)
-			stack.append(rhs)
-			stack.append(pair)
+			scope.stack.append(lhs)
+			scope.stack.append(rhs)
+			scope.stack.append(pair)
 			print(pair)
 
-	return stack, dictionary
+	return scope
 
 interpreter("./input.txt", "./output.txt")
