@@ -30,7 +30,10 @@ def interpreter(input, output):
 		if "quit" in line:
 			# print stack
 			while len(stack) != 0:
-				output_file.write(str(stack.pop()) + "\n");
+				if len(stack) != 1:
+					output_file.write(str(stack.pop()[1]) + "\n");
+				else:
+					output_file.write(str(stack.pop()[1]));
 	
 
 	#close streams
@@ -45,49 +48,62 @@ def push_helper(line):
 	token = re.match(r"^(:true:|:false:|:error:)$", line)
 	if token is not None:
 		token = token.group()
-		print("literals", token)
-		return token
+		print("literal", token)
+		pair = ("literal", token)
+		return pair
 	# try to match strings
 	token = re.match(r'^"(.*?)"$', line)
 	if token is not None:
 		token = token.group(1)
-		print("strings", token)
-		return token
+		print("string", token)
+		pair = ("string", token)
+		return pair
 	# try to match names
 	token = re.match(r"^[a-zA-Z]+\d*$", line)
 	if token is not None:
 		token = token.group()
-		print("names", token)
-		return token
+		print("name", token)
+		pair = ("name", token)
+		return pair
 	# try to match integers
 	token = re.match(r"^\-?\d+$", line)
 	if token is not None:
 		token = token.group()
 		if token == "-0":
 			token = "0"
-		print("numbers", token)
-		return token
+		print("number", token)
+		pair = ("number", token)
+		return pair
 	
 	# not able to match anything
 	token = ":error:"
-	return token
+	pair = ("error", token)
+	return pair
 
 def pop_helper(stack):
 	if not stack:
-		stack.append(":error:")
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
 	else:
 		stack.pop()
 	return stack
 
 def math_helper(stack, op):
 	if len(stack) <= 1:
-		stack.append(":error:")
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
 	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
+		right = stack.pop()
+		left = stack.pop()
+
 		try:
-			lhs = int(lhs)
-			rhs = int(rhs)
+			if right[0] != "number" or left[0] != "number":
+				raise ValueError("NaN")
+
+			lhs = int(left[1])
+			rhs = int(right[1])
 			# switch operations
 			if "add" in op:
 				total = (lhs + rhs)
@@ -98,40 +114,54 @@ def math_helper(stack, op):
 			elif "div" in op:
 				# divison by zero
 				if rhs == 0:
-					raise ValueError("division by zero")
+					raise ValueError("Division by zero")
 				else:
-					total = (lhs / rhs)
+					total = (lhs // rhs)
 			elif "rem" in op:
 				# divison by zero
 				if rhs == 0:
-					raise ValueError("division by zero")
+					raise ValueError("Division by zero")
 				else:	
 					total = (lhs % rhs)
 			# append total
-			stack.append(total)
-		except ValueError:
-			stack.append(lhs)
-			stack.append(rhs)
-			stack.append(":error:")	
+			pair = ("number", total)
+			stack.append(pair)
+		except ValueError as e:
+			print(e)
+			stack.append(left)
+			stack.append(right)
+			token = ":error:"
+			pair = ("error", token)
+			stack.append(pair)	
 	return stack
 
 def neg_helper(stack):
 	if not stack:
-		stack.append(":error:")
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
 	else:
 		token = stack.pop()
 		try:
-			num = int(token)
+			if token[0] != "number":
+				raise ValueError('NaN')
+			num = int(token[1])
 			num = -num
-			stack.append(num)
-		except ValueError:
+			pair = ("number", num)
+			stack.append(pair)
+		except ValueError as e:
+			print(e)
 			stack.append(token)
-			stack.append(":error:")
+			token = ":error:"
+			pair = ("error", token)
+			stack.append(pair)
 	return stack
 
 def swap_helper(stack):
 	if len(stack) <= 1:
-		stack.append(":error:")
+		token = ":error:"
+		pair = ("error", token)
+		stack.append(pair)
 	else:
 		lhs = stack.pop()
 		rhs = stack.pop()
@@ -140,4 +170,4 @@ def swap_helper(stack):
 		stack.append(rhs)
 	return stack
 
-interpreter("./input.txt", "output.txt")
+# interpreter("./input.txt", "./output.txt")

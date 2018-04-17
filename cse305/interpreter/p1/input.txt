@@ -1,4 +1,4 @@
 push 5
-swap
-swap
+push 10
+rem
 quit
