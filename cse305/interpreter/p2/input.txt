@@ -1,5 +1,15 @@
-push :false:
-push 9
-push 8
-if
+let
+let
+let
+let
+push five
+push 5
+bind
+end
+end
+end
+end
+push five
+push 5
+add
 quit
