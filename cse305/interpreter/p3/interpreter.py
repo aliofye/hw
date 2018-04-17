@@ -1,5 +1,19 @@
 import re
 
+keywords = ["push", "pop", "add", "sub", "mul", "div", "rem", "neg", "swap",
+ 			"cat", "and", "or", "not", "equal", "lessThan", "bind", "if", "let",
+ 			"end","fun", "funEnd", "quit"]
+class Scope():
+	def __init__(self):
+		self.stack = list()
+		self.dictionary = dict()
+
+class Closure():
+	def __init__(self):
+		self.scope = Scope()
+		self.params = list()
+		self.code = list()
+
 def interpreter(input, output):
 	# open files
 	input_file = open(input, "r")
@@ -28,9 +42,11 @@ def parse(stack, dictionary, commands):
 	commands.reverse()
 	# while commands is not empty
 	while not not commands:
-		command = commands.pop()
+		line = commands.pop()
+		command = line.split()[0]
+		
 		if "push" in command:
-			token = push_helper(command)
+			token = push_helper(line)
 			stack.append(token)
 		elif "pop" in command:
 			stack = pop_helper(stack)
@@ -67,6 +83,10 @@ def parse(stack, dictionary, commands):
 		elif "let" in command:
 			stack, commands = let_helper(stack, dictionary, commands)
 		elif "end" in command:
+			stack = [stack.pop()]
+		elif "fun" in command:
+			stack, commands = fun_helper(line, stack, dictionary, commands)
+		elif "funEnd" in command:
 			stack = [stack.pop()]
 		elif "quit" in command:
 			print("quit")
@@ -399,6 +419,7 @@ def bool_helper(stack, dictionary, op):
 			print(pair)
 
 	return stack
+
 def let_helper(stack, dictionary, commands):
 	# init new scope
 	ls = list()
@@ -428,6 +449,26 @@ def let_helper(stack, dictionary, commands):
 	pair = ls.pop()
 	stack.append(pair)
 	print(stack)
+
+	return stack, commands
+
+def fun_helper(line, stack, dictionary, commands):
+	words = line.split()
+	funName = words[1]
+	funArg = words[2]
+	
+	try:
+		if funName in keywords:
+			raise ValueError(str(funName + " is a reserved keyword"))
+		if funArg in keywords:
+			raise ValueError(str(funArg + " is a reserved keyword"))
+		if funName == funArg:
+			raise ValueError('Function and argument names cannot be the same')
+
+		print("fun " + funName + " " + funArg)
+
+	except ValueError as e:
+		print(e)
 
 	return stack, commands
 
@@ -473,4 +514,4 @@ def bind_helper(stack, dictionary):
 
 	return stack, dictionary
 
-interpreter("./input/input15.txt", "./output.txt")
+interpreter("./input.txt", "./output.txt")

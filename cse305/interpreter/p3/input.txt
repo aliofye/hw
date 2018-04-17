@@ -1,15 +1,2 @@
-let
-let
-let
-let
-push five
-push 5
-bind
-end
-end
-end
-end
-push five
-push 5
-add
+fun name2 name2
 quit
