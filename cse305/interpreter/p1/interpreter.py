@@ -5,8 +5,7 @@ def interpreter(input, output):
 	input_file = open(input, "r")
 	output_file = open(output, "w")
 	# init stack
-	stack = list()
-	dictionary = dict()
+	stack = []
 	#iterate through lines in file
 	for line in input_file:
 		if "push" in line:
@@ -15,31 +14,19 @@ def interpreter(input, output):
 		if "pop" in line:
 			stack = pop_helper(stack)
 		if "add" in line:
-			stack = math_helper(stack, dictionary, "add")
+			stack = math_helper(stack, "add")
 		if "sub" in line:
-			stack = math_helper(stack, dictionary, "sub")
+			stack = math_helper(stack, "sub")
 		if "mul" in line:
-			stack = math_helper(stack, dictionary, "mul")
+			stack = math_helper(stack, "mul")
 		if "div" in line:
-			stack = math_helper(stack, dictionary, "div")
+			stack = math_helper(stack, "div")
 		if "rem" in line:
-			stack = math_helper(stack, dictionary, "rem")
+			stack = math_helper(stack, "rem")
 		if "neg" in line:
-			stack = neg_helper(stack, dictionary)
+			stack = neg_helper(stack)
 		if "swap" in line:
 			stack = swap_helper(stack)
-		if "cat" in line:
-			stack = cat_helper(stack, dictionary)
-		if "and" in line:
-			stack = bool_helper(stack, dictionary, "and")
-		if "or" in line:
-			stack = bool_helper(stack, dictionary, "or")
-		if "equal" in line:
-			stack = math_helper(stack, dictionary, "equal")
-		if "lessThan" in line:
-			stack = math_helper(stack, dictionary, "lessThan")
-		if "bind" in line:
-			stack, dictionary = bind_helper(stack, dictionary)
 		if "quit" in line:
 			# print stack
 			while len(stack) != 0:
@@ -47,8 +34,6 @@ def interpreter(input, output):
 					output_file.write(str(stack.pop()[1]) + "\n");
 				else:
 					output_file.write(str(stack.pop()[1]));
-		pair = ("error", ":error:")
-		stack.append(pair)
 	
 
 	#close streams
@@ -59,19 +44,12 @@ def push_helper(line):
 	# sanitize input
 	line = line.replace("push", "")
 	line = line.strip()
-	# try to match error literals
-	token = re.match(r"^(:error:)$", line)
-	if token is not None:
-		token = token.group()
-		print("error", token)
-		pair = ("error", token)
-		return pair
 	# try to match boolean or error literals
-	token = re.match(r"^(:true:|:false:)$", line)
+	token = re.match(r"^(:true:|:false:|:error:)$", line)
 	if token is not None:
 		token = token.group()
-		print("boolean", token)
-		pair = ("boolean", token)
+		print("literal", token)
+		pair = ("literal", token)
 		return pair
 	# try to match strings
 	token = re.match(r'^"(.*?)"$', line)
@@ -111,88 +89,53 @@ def pop_helper(stack):
 		stack.pop()
 	return stack
 
-def math_helper(stack, dictionary, op):
+def math_helper(stack, op):
 	if len(stack) <= 1:
 		token = ":error:"
 		pair = ("error", token)
 		stack.append(pair)
 	else:
-		lop = stack.pop()
-		rop = stack.pop()
+		right = stack.pop()
+		left = stack.pop()
 
 		try:
-			# check if tokens are bound
-			lop, rop = binary_binds(dictionary, lop, rop);
-			
-			if lop[0] != "number" or rop[0] != "number":
+			if right[0] != "number" or left[0] != "number":
 				raise ValueError("NaN")
 
-			lhs = int(lop[1])
-			rhs = int(rop[1])
+			lhs = int(left[1])
+			rhs = int(right[1])
 			# switch operations
 			if "add" in op:
 				total = (lhs + rhs)
-				pair = ("number", total)
 			elif "sub" in op:
 				total = (lhs - rhs)
-				pair = ("number", total)
 			elif "mul" in op:
 				total = (lhs * rhs)
-				pair = ("number", total)
 			elif "div" in op:
 				# divison by zero
 				if rhs == 0:
 					raise ValueError("Division by zero")
 				else:
 					total = (lhs // rhs)
-					pair = ("number", total)
 			elif "rem" in op:
 				# divison by zero
 				if rhs == 0:
 					raise ValueError("Division by zero")
 				else:	
 					total = (lhs % rhs)
-					pair = ("number", total)
-			elif "equal" in op:
-				token = ":true:" if lhs == rhs else ":false:"
-				pair = ("boolean", token)
-			elif "lessThan" in op:
-				token = ":true:" if lhs < rhs else ":false:"
-				pair = ("boolean", token)
 			# append total
+			pair = ("number", total)
 			stack.append(pair)
 		except ValueError as e:
 			print(e)
-			stack.append(lop)
-			stack.append(rop)
+			stack.append(left)
+			stack.append(right)
 			token = ":error:"
 			pair = ("error", token)
 			stack.append(pair)	
 	return stack
 
-def binary_binds(dictionary, lop, rop):
-	if lop[0] == "name" and rop[0] == "name":
-		if lop[1] in dictionary:
-			lop = dictionary[lop[1]]
-		if rop[1] in dictionary:
-			rop = dictionary[rop[1]]
-	elif lop[0] == "name" and rop[0] != "name":
-		if lop[1] in dictionary:
-			lop = dictionary[lop[1]]
-	elif lop[0] != "name" and rop[0] == "name":
-		if rop[1] in dictionary:
-			rop = dictionary[rop[1]]
-	
-	return lop, rop
-
-def unary_binds(dictionary, op):
-	if op[0] == "name":
-		if op[1] in dictionary:
-			op = dictionary[op[1]]
-	return op
-
-
-def neg_helper(stack, dictionary):
+def neg_helper(stack):
 	if not stack:
 		token = ":error:"
 		pair = ("error", token)
@@ -200,9 +143,6 @@ def neg_helper(stack, dictionary):
 	else:
 		token = stack.pop()
 		try:
-			# check if token is bound
-			token = unary_binds(dictionary, token)
-			
 			if token[0] != "number":
 				raise ValueError('NaN')
 			num = int(token[1])
@@ -223,118 +163,11 @@ def swap_helper(stack):
 		pair = ("error", token)
 		stack.append(pair)
 	else:
-		rhs = stack.pop()
 		lhs = stack.pop()
+		rhs = stack.pop()
 		# swap
-		stack.append(rhs)
 		stack.append(lhs)
+		stack.append(rhs)
 	return stack
 
-def cat_helper(stack, dictionary):
-	if len(stack) <= 1:
-		token = ":error:"
-		pair = ("error", token)
-		stack.append(pair)
-	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
-		
-		try:
-			# check if operands are bound
-			lhs, rhs = binary_binds(dictionary, lhs, rhs)
-			
-			if lhs[0] != "string" or rhs[0] != "string":
-				raise ValueError('Not a String')
-			token = lhs[1] + ' ' + rhs[1]
-			pair = ("string", token)
-			stack.append(pair)
-
-		except ValueError as e:
-			print(e)
-			token = ":error:"
-			pair = ("error", token)
-			stack.append(lhs)
-			stack.append(rhs)
-			stack.append(pair)
-
-	return stack
-
-def bool_helper(stack, dictionary, op):
-	if len(stack) <= 1:
-		token = ":error:"
-		pair = ("error", token)
-		stack.append(pair)
-	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
-		
-		try:
-			# check if operands are bound
-			lhs, rhs = binary_binds(dictionary, lhs, rhs)
-			
-			if lhs[0] != "boolean" or rhs[0] != "boolean":
-				raise ValueError('Not a Boolean')
-			# extract truth values
-			lop = True if "true" in lhs[1] else False
-			rop = True if "true" in rhs[1] else False
-			# get truth value
-			token = ""
-			if "and" in op:
-				token = ":true:" if lop and rop else ":false:"
-			else:
-				token = ":true:" if lop or rop else ":false:"
-
-			pair = ("boolean", token)
-			stack.append(pair)
-
-		except ValueError as e:
-			print(e)
-			token = ":error:"
-			pair = ("error", token)
-			stack.append(lhs)
-			stack.append(rhs)
-			stack.append(pair)
-
-	return stack
-
-def bind_helper(stack, dictionary):
-	if len(stack) <= 1:
-		token = ":error:"
-		pair = ("error", token)
-		stack.append(pair)
-	else:
-		rhs = stack.pop()
-		lhs = stack.pop()
-		
-		try:
-			if lhs[0] != "name":
-				raise ValueError('Not a Name')
-			if rhs[0] != "number" and rhs[0] != "string" and rhs[0] != "boolean" and rhs[0] != "unit" and rhs[0] != "name":
-				raise ValueError('Not a Valid Value')
-			if rhs[0] == "name" and rhs[1] not in dictionary:
-				raise ValueError('Name is Unbound')
-			elif rhs[0] == "name" and rhs[1] in dictionary:
-				value = dictionary[rhs[1]]
-				dictionary[lhs[1]] = value 				
-				token = ":unit:"
-				pair = ("unit", token)
-				stack.append(pair)
-			else:
-				dictionary[lhs[1]] = rhs 				
-				token = ":unit:"
-				pair = ("unit", token)
-				stack.append(pair)
-				print(dictionary)
-			
-
-		except ValueError as e:
-			print(e)
-			token = ":error:"
-			pair = ("error", token)
-			stack.append(lhs)
-			stack.append(rhs)
-			stack.append(pair)
-
-	return stack, dictionary
-
-interpreter("./input.txt", "./output.txt")
+# interpreter("./input.txt", "./output.txt")
