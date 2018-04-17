@@ -473,4 +473,4 @@ def bind_helper(stack, dictionary):
 
 	return stack, dictionary
 
-# interpreter("./input/input15.txt", "./output.txt")
+interpreter("./input/input15.txt", "./output.txt")
