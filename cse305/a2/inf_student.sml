@@ -51,28 +51,39 @@ fun SIFT NIL = NIL
  
 fun even (x : int) : bool = x mod 2 = 0;
 fun odd  (x : int) : bool = x mod 2 <> 0;
-fun prime(x: int): bool =
-  let fun divisor(m: int) =
-    if x = 1 then false
-    else if x = 2 then true
-    else if x mod m = 0 then false
-	else if m*m >= x then true
-	else divisor(m+1)
-  in
-    divisor(2)
-  end;
-
 val fibs  = FIB 0 1;
 val natural = FROMN 0;
 val evens = FILTER even natural;
 val odds  = FILTER odd natural;
 val allZeros = FILL 0;
 val allOnes  = FILL 1;
-val primes   = FILTER prime natural;
+val primes   = SIFT (FROMN 2);
 
-fun printGenList (f : ('a -> 'b)) (l : ('a list)) : unit = ()
-fun printList (f : string, l : int list) : unit = ()
-fun printPairList (f : string, l : (int * int) list) : unit = ()
-fun rev_zip (infL1 : 'a inflist, infL2 : 'b inflist) : ('b * 'a) inflist = NIL
+fun printGenList (f : ('a -> 'b)) nil : unit = ()
+	| printGenList (f : ('a -> 'b)) (l : ('a list)) : unit = (f (hd l); printGenList f (tl l));
 
-val result = NTH 19 primes;
+fun printList (f : string, l : int list) : unit = (
+	let
+    	val outs = TextIO.openOut(f);
+	in
+		printGenList (fn(i) => TextIO.output(outs, Int.toString(i)^" ")) l;
+		TextIO.closeOut(outs)
+	end);
+
+fun printPairList (f : string, l : (int * int) list) : unit = (
+	let
+		val outs = TextIO.openOut(f);
+	in
+		printGenList (fn(i,j) => TextIO.output(outs, "("^Int.toString(i)^", "^Int.toString(j)^") ")) l;
+		TextIO.closeOut(outs)
+	end);
+
+fun rev_zip (_, NIL) = NIL
+	| rev_zip (NIL, _) = NIL
+	| rev_zip (infL1 : 'a inflist, infL2 : 'b inflist) : ('b * 'a) inflist = CONS((HD infL2, HD infL1), fn () => (rev_zip (TL infL1, TL infL2)));
+
+(*val result = TAKE(rev_zip (evens, odds), 10);*)
+(*val result = printList("output.txt", [1,2,3,4]);*)
+(*val result = printPairList("output.txt", [(1,1),(2,2),(3,3),(4,4)]);*)
+(*val result = NTH 4 primes;*)
+
