@@ -52,4 +52,4 @@ fun pangram(inFile : string, outFile : string) =
     	helper(TextIO.inputLine(ins))
   	end;
 
-(*val _ = pangram("./tests/input/input13.txt", "output.txt")*)
+val _ = pangram("./tests/input/input13.txt", "output.txt")

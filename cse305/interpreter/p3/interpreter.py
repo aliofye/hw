@@ -1,8 +1,9 @@
 import re
+import copy
 
 keywords = ["push", "pop", "add", "sub", "mul", "div", "rem", "neg", "swap",
  			"cat", "and", "or", "not", "equal", "lessThan", "bind", "if", "let",
- 			"end","fun", "funEnd", "quit"]
+ 			"end","fun", "funEnd", "return", "call", "quit"]
 
 class Scope():
 	def __init__(self):
@@ -12,8 +13,10 @@ class Scope():
 class Closure():
 	def __init__(self):
 		self.scope = Scope()
-		self.params = list()
-		self.code = list()
+		self.arg = str()
+		self.commands = list()
+		self.type = str()
+
 
 def interpreter(input, output):
 	# open files
@@ -83,16 +86,19 @@ def parse(scope, commands):
 			scope, commands = let_helper(scope, commands)
 		elif "end" in command:
 			scope.stack = [scope.stack.pop()]
-		elif "fun" in command:
+		elif "fun" in command or "inOutFun" in command:
 			scope, commands = fun_helper(line, scope, commands)
-		elif "funEnd" in command:
-			scope.stack = [scope.stack.pop()]
+		elif "return" in command:
+			scope.stack = return_helper(scope)
+		elif "call" in command:
+			scope.stack = call_helper(scope)
 		elif "quit" in command:
 			print("quit")
 		else:
 			pair = ("error", ":error:")
 			scope.stack.append(pair)
 			print(pair)
+	print("scope", scope.stack)
 	# return scoped stack and dictionary
 	return scope
 
@@ -236,6 +242,20 @@ def unary_binds(dictionary, op):
 			op = dictionary[op[1]]
 	return op
 
+def return_helper(scope):
+	if not scope.stack:
+		token = ":error:"
+		pair = ("error", token)
+		scope.stack.append(pair)
+		print(pair)
+	else:
+		op = scope.stack.pop()
+		isClosure = True if type(scope.dictionary[op[1]]) is type(Closure()) else False
+		if not isClosure:
+			op = unary_binds(scope.dictionary, op)
+			scope.stack.append(op)
+
+	return scope.stack
 
 def neg_helper(scope):
 	if not scope.stack:
@@ -451,9 +471,10 @@ def let_helper(scope, commands):
 	return scope, commands
 
 def fun_helper(line, scope, commands):
-	words = line.split()
-	funName = words[1]
-	funArg = words[2]
+	tokens = line.split()
+	funType = tokens[0]
+	funName = tokens[1]
+	funArg = tokens[2]
 	
 	try:
 		if funName in keywords:
@@ -463,12 +484,102 @@ def fun_helper(line, scope, commands):
 		if funName == funArg:
 			raise ValueError('Function and argument names cannot be the same')
 
-		print("fun " + funName + " " + funArg)
+		# closure scope
+		closure = Closure()
+		closure.scope = copy.deepcopy(scope)
+		closure.scope.dictionary[funName] = closure
+		print("env", closure.scope.dictionary)
+		# closure code
+		code = commands.pop()
+		closure.commands.append(code)
+		while "funEnd" not in code and not not commands:
+			code = commands.pop()
+			if "funEnd" not in code:
+				closure.commands.append(code)
+		# closure param
+		closure.arg = funArg
+		# bind function name to closure
+		scope.dictionary[funName] = closure
+		# check if regular fun or inOutFun
+		if "inOutFun" in funType:
+			closure.type = "inOutFun"
+		else:
+			closure.type = "fun"
+		# push unit
+		pair = ("unit", ":unit:")
+		scope.stack.append(pair)
+		print(pair)
 
 	except ValueError as e:
 		print(e)
+		error = ":error:"
+		pair = ("error", error)
+		scope.stack.append(pair)
+		print(pair)
 
 	return scope, commands
+
+def call_helper(scope):
+	if len(scope.stack) < 2:
+		token = ":error:"
+		pair = ("error", token)
+		scope.stack.append(pair)
+		print(pair)
+	else:
+		funArg = scope.stack.pop()
+		funName = scope.stack.pop()
+		formal = funArg[1]
+
+		print(funName, funArg)
+		try:
+			if funName[0] != "name":
+				raise ValueError('Function name can only be of type \"name\".')
+			if funArg[0] != "name" and funArg[0] != "number" and funArg[0] != "string" and funArg[0] != "boolean" and funArg[0] != "unit":
+				raise ValueError('Function argument is invalid')
+			if funName[1] not in scope.dictionary:
+				raise ValueError('Function is not defined')
+			else:
+				closure = scope.dictionary[funName[1]]
+				if type(closure) is not type(Closure()):
+					raise ValueError('Function name is not bound to a closure')
+			if funArg[0] == "name" and funArg[1] not in scope.dictionary:
+				raise ValueError('Function argument is not bound')
+			if funName[1] == funArg[1] and not scope.dictionary[funArg[1]]:
+				raise ValueError('Function name and argument cannot be the same')
+			else:
+				funArg = unary_binds(scope.dictionary, funArg)
+			print("stack", scope.stack)
+			# print("debug", funArg)
+
+			# store scope
+			# init local scope
+			fun_scope = Scope()
+			fun_scope.dictionary = closure.scope.dictionary.copy()
+			fun_scope.dictionary[closure.arg] = funArg
+			lc = closure.commands
+			print("fun_env", fun_scope.dictionary)
+			print("fun_cmd", lc)
+
+			fun_scope = parse(fun_scope, lc)
+			# bind if inOutFun
+			if "inOutFun" in closure.type:
+				print("scope", scope.dictionary)
+				print("fun_scope", fun_scope.dictionary)
+				scope.dictionary[formal] = fun_scope.dictionary[closure.arg]
+			
+			if fun_scope.stack:
+				pair = fun_scope.stack.pop()
+				scope.stack.append(pair)
+
+		except ValueError as e:
+			print(e)
+			error = ":error:"
+			pair = ("error", error)
+			scope.stack.append(funName)
+			scope.stack.append(funArg)
+			scope.stack.append(pair)
+			print(pair)
+	return scope.stack
 
 def bind_helper(scope):
 	if len(scope.stack) <= 1:

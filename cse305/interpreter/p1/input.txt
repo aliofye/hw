@@ -1,3 +1,7 @@
 push a
-7.5
+push 20
+bind
+push a
+push a
+add
 quit

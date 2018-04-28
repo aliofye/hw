@@ -1,10 +1,10 @@
-let
-let
-push 1
-push 2
-add
-end
-push 3
-add
-end
+fun identity x
+push x
+return
+funEnd
+push identity
+push identity
+call
+push "Dunder Mifflin"
+call
 quit
