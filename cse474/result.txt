@@ -1,0 +1,36 @@
+preprocess done!
+
+LOGISTIC REGRESSION WITH GRADIENT DESCENT
+
+ Training set Accuracy:85.544%
+
+ Validation set Accuracy:85.09%
+
+ Testing set Accuracy:85.14%
+
+
+--------------SVM-------------------
+
+
+############LINEAR KERNEL#############
+
+ Training Set Accuracy:97.286%
+
+ Validation Set Accuracy:93.64%
+
+ Testing Set Accuracy:93.78%
+############RADIAL BASIS (GAMMA=0.1)#############
+
+ Training Set Accuracy:99.992%
+
+ Validation Set Accuracy:94.76%
+
+ Testing Set Accuracy:94.96%
+############RADIAL BASIS (DEFAULT)#############
+
+ Training Set Accuracy:94.294%
+
+ Validation Set Accuracy:94.02%
+
+ Testing Set Accuracy:94.42%
+############RADIAL BASIS (VARYING C VALUES)#############

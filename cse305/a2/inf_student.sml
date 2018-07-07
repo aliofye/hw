@@ -25,6 +25,7 @@ fun FROMN n = CONS(n, fn () => FROMN (n+1));
 fun FILL n = CONS(n, fn () => FILL n);
 
 fun FIB n m = CONS(n, fn () => FIB m (n+m));
+fun SEQ w x y z = CONS(w, fn () => SEQ x y z (w+x));
 
 fun FILTER f l =
   if NUL l
@@ -58,6 +59,7 @@ val odds  = FILTER odd natural;
 val allZeros = FILL 0;
 val allOnes  = FILL 1;
 val primes   = SIFT (FROMN 2);
+val seq = SEQ 1 2 3 5;
 
 fun printGenList (f : ('a -> 'b)) nil : unit = ()
 	| printGenList (f : ('a -> 'b)) (l : ('a list)) : unit = (f (hd l); printGenList f (tl l));
@@ -82,8 +84,8 @@ fun rev_zip (_, NIL) = NIL
 	| rev_zip (NIL, _) = NIL
 	| rev_zip (infL1 : 'a inflist, infL2 : 'b inflist) : ('b * 'a) inflist = CONS((HD infL2, HD infL1), fn () => (rev_zip (TL infL1, TL infL2)));
 
-(*val result = TAKE(rev_zip (evens, odds), 10);*)
+(*val result = TAKE(rev_zip (evens, primes), 10);*)
 (*val result = printList("output.txt", [1,2,3,4]);*)
 (*val result = printPairList("output.txt", [(1,1),(2,2),(3,3),(4,4)]);*)
-(*val result = NTH 4 primes;*)
+(*val result = NTH 10000 primes;*)
 
